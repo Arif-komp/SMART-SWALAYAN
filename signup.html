@@ -58,10 +58,8 @@
 <script>
     // =======================================================
     // 🔑 GANTI DENGAN URL DEPLOYMENT APPS SCRIPT TERBARU ANDA 🔑
-    // =======================================================
-    const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbypHz6zjd3FDF8Thzb9aRmsPffQ0TulxBxAvRJ-11BHDuNDA4FsAAgXqtRWs7PA921v/exec'; 
-    
-    const API_URL = GAS_API_URL;
+    // Contoh placeholder URL:
+    const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbw8rBjJJQCWb_mA0_m_FiimqCaW2DpaxLLK4Deb2i5wGvYGJ6IpOAewwkjr-R2MijxH/exec'; 
     
     // DOM Elements
     const SIGNUP_FORM = document.getElementById('signupForm');
@@ -86,11 +84,10 @@
         const cacheBuster = `?t=${new Date().getTime()}`;
         const targetUrl = GAS_API_URL + cacheBuster;
 
-        // FETCH LANGSUNG TANPA PROXY (Setelah Apps Script dikoreksi)
+        // FETCH LANGSUNG TANPA PROXY
         try {
             const response = await fetch(targetUrl, {
                 method: 'POST',
-                // Header yang dibutuhkan oleh Apps Script
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
                 body: JSON.stringify(payload)
             });
@@ -102,6 +99,7 @@
             const responseText = await response.text();
             
             try {
+                // Coba parse respons sebagai JSON
                 const responseData = JSON.parse(responseText);
 
                 if (responseData.status === 'error') {
@@ -109,6 +107,8 @@
                 }
                 return responseData;
             } catch (e) {
+                 // 🔑 KODE DEBUG: Tampilkan respons mentah jika gagal parse JSON 🔑
+                 console.error("Gagal parse JSON. Respons dari Apps Script:", responseText);
                  throw new Error('Respons Apps Script tidak valid. Cek izin dan URL.');
             }
 
