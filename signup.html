@@ -57,9 +57,9 @@
 
 <script>
     // =======================================================
-    // 🔑 WAJIB GANTI DENGAN URL DEPLOYMENT APPS SCRIPT TERBARU ANDA 🔑
+    // 🔑 GANTI DENGAN URL DEPLOYMENT APPS SCRIPT TERBARU ANDA 🔑
     // =======================================================
-    const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwlLnOkgiAx_ZkGVWA_O1xO3ra_rSM7p4qCfbjFsgAkif6OqPznIa5pYuHkXExYljM/exec'; 
+    const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbypHz6zjd3FDF8Thzb9aRmsPffQ0TulxBxAvRJ-11BHDuNDA4FsAAgXqtRWs7PA921v/exec'; 
     
     const API_URL = GAS_API_URL;
     
@@ -83,18 +83,15 @@
     async function sendApiRequest(action, data = {}) {
         const payload = { action, ...data };
         
-        // Solusi Cache-Buster
         const cacheBuster = `?t=${new Date().getTime()}`;
         const targetUrl = GAS_API_URL + cacheBuster;
 
-        // 🔑 IMPLEMENTASI PROXY CORS FINAL (Menggunakan allorigins) 🔑
-        const PROXY_SERVER = 'https://api.allorigins.win/raw?url='; 
-        const urlWithProxy = PROXY_SERVER + encodeURIComponent(targetUrl);
-        
+        // FETCH LANGSUNG TANPA PROXY (Setelah Apps Script dikoreksi)
         try {
-            const response = await fetch(urlWithProxy, {
+            const response = await fetch(targetUrl, {
                 method: 'POST',
-                // ❗ PENTING: Header Content-Type DIHAPUS
+                // Header yang dibutuhkan oleh Apps Script
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
                 body: JSON.stringify(payload)
             });
 
@@ -112,12 +109,12 @@
                 }
                 return responseData;
             } catch (e) {
-                 throw new Error('Respons dari Apps Script tidak valid: ' + responseText);
+                 throw new Error('Respons Apps Script tidak valid. Cek izin dan URL.');
             }
 
         } catch (error) {
             console.error("API Request Failed:", error);
-            throw new Error(error.message || 'Koneksi ke Apps Script via Proxy Gagal.');
+            throw new Error(error.message || 'Koneksi Apps Script Gagal. Cek Izin dan URL.');
         }
     }
 
