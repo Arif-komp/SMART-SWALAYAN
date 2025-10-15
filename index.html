@@ -6,6 +6,7 @@
     <title>SMART SWALAYAN - MASUK</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
     <style>
         :root { --primary-color: #00796b; --secondary-color: #ff9800; --bg-color: #eceff1; --card-bg: #ffffff; --border-radius: 12px; --shadow-heavy: 0 10px 30px rgba(0, 0, 0, 0.15); }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
@@ -54,9 +55,10 @@
 
 <script>
     // =======================================================
-    // WAJIB GANTI: URL DEPLOYMENT GOOGLE APPS SCRIPT BARU ANDA
+    // 🔑 GANTI DENGAN URL API EKSEKUSI TERBARU ANDA 🔑
     // =======================================================
-    const API_URL = 'https://script.google.com/macros/s/AKfycbzk_6PIfEPjD5vqbzDOOU4tS4HQWA5CnQ9ByU8_N6x_Gc2q2EtGKjDU65iqntNyCfCg5A/exec'; 
+// GANTI DENGAN URL API LENGKAP BARU INI
+const API_URL = 'https://script.google.com/macros/s/AKfycbxX4UoOrL9xnwZ7Ks8dqA6p1Q14DQqpp6WUhGKtHFXmUcYPJEKf2Kjrh8vduZfg3Bhbeg/exec';
     
     // DOM Elements
     const LOGIN_FORM = document.getElementById('loginForm');
@@ -78,8 +80,9 @@
     async function sendApiRequest(action, data = {}) {
         const payload = { action, ...data };
         
-        // 💡 SOLUSI CACHE-BUSTER: Menambahkan parameter waktu ke URL
+        // Solusi Cache-Buster
         const cacheBuster = `?t=${new Date().getTime()}`;
+        // Menggabungkan URL API (yang sekarang harusnya adalah Exec API) dengan cache-buster
         const urlWithBuster = API_URL + cacheBuster;
 
         try {
@@ -104,9 +107,9 @@
 
         } catch (error) {
             console.error("API Request Failed:", error);
-            // Menangkap error CORS/Failed to fetch dan memberikan pesan yang jelas
-            if (error.message.includes("Failed to fetch") || error.message.includes("Koneksi Gagal")) {
-                 throw new Error("Koneksi ke Apps Script Gagal. Cek Izin CORS/URL Deployment.");
+            // Menambahkan pesan khusus untuk memandu debugging CORS
+            if (error.message.includes("Failed to fetch") || error.message.includes("No 'Access-Control-Allow-Origin' header is present")) {
+                 throw new Error("Koneksi API Gagal. Pastikan Apps Script DEPLOYMENT IZINNYA 'Anyone'!");
             }
             throw new Error(error.message || 'Koneksi Gagal');
         }
@@ -160,7 +163,7 @@
             
             // Arahkan ke halaman input utama setelah 1 detik
             setTimeout(() => {
-                window.location.href = './main.html'; // GANTI JIKA NAMA FILE BEDA
+                window.location.href = './main.html'; 
             }, 1000);
             
         } catch (err) {
