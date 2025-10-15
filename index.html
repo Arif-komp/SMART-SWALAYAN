@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMART SWALAYAN - MASUK</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        :root { --primary-color: #00796b; --secondary-color: #ff9800; --bg-color: #eceff1; --card-bg: #ffffff; --border-radius: 12px; --shadow-heavy: 0 10px 30px rgba(0, 0, 0, 0.15); }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+        body { background-color: var(--bg-color); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .container { background-color: var(--card-bg); padding: 35px; border-radius: var(--border-radius); box-shadow: var(--shadow-heavy); width: 100%; max-width: 400px; }
+        .header-logo { display: block; max-width: 100%; max-height: 80px; margin: 0 auto 25px auto; border: 3px solid var(--primary-color); border-radius: 10px; }
+        .input-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; color: var(--primary-color); font-weight: 600; font-size: 0.9em; }
+        input, select { width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 1em; }
+        input:focus, select:focus { border-color: var(--primary-color); box-shadow: 0 0 0 4px rgba(0, 121, 107, 0.2); outline: none; }
+        .login-btn { width: 100%; padding: 15px 20px; background-color: var(--secondary-color); color: white; border: none; border-radius: 10px; font-size: 1.1em; font-weight: 700; margin-top: 20px; cursor: pointer; box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4); }
+        .message { text-align: center; margin-top: 15px; padding: 10px; border-radius: 8px; font-weight: 600; opacity: 0; transition: opacity 0.3s; }
+        .message.show { opacity: 1; }
+        .message.error { background-color: #fce4e4; color: #c62828; }
+        .message.loading { background-color: #fffde7; color: #fbc02d; }
+        .message.success { background-color: #e8f5e9; color: #2e7d32; }
+        .link-footer { margin-top: 15px; text-align: center; font-size: 0.9em; }
+        .link-footer a { color: #2196f3; font-weight: bold; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="smart.jpg" alt="Logo Smart Swalayan" class="header-logo">
+        
+        <form id="loginForm">
+            <div class="input-group">
+                <label for="toko"><i class="fas fa-store"></i> Pilih Toko / Outlet</label>
+                <select id="toko" name="toko" required>
+                    <option value="" disabled selected>Memuat daftar toko...</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label for="nama"><i class="fas fa-user"></i> Nama Lengkap Anda</label>
+                <input type="text" id="nama" name="nama" placeholder="Masukkan Nama Anda (Sesuai Pendaftaran)" required>
+            </div>
+
+            <button type="submit" id="loginButton" class="login-btn"><i class="fas fa-sign-in-alt"></i> MASUK</button>
+            <p id="message" class="message"></p>
+        </form>
+        
+        <p class="link-footer">
+            Klik <a href="./signup.html"><b>DAFTAR</b></a> untuk meminta ijin akses
+        </p>
+    </div>
+
+<script>
+    // =======================================================
+    // WAJIB GANTI: URL DEPLOYMENT GOOGLE APPS SCRIPT ANDA
+    // =======================================================
+    const API_URL = 'https://script.google.com/macros/s/AKfycbwvjLWeczNCXs4VC93tjXN7rm5K4raY7dioiyj79Xrx836Y5p4GBSusnDfnsqlSar4T/exec'; 
+    
+    // DOM Elements
+    const LOGIN_FORM = document.getElementById('loginForm');
+    const TOKO_SELECT = document.getElementById('toko');
+    const MESSAGE_ELEMENT = document.getElementById('message');
+    
+    // --- FUNGSI UTILITAS ---
+    
+    function displayMessage(text, type = 'error') {
+        MESSAGE_ELEMENT.textContent = text;
+        MESSAGE_ELEMENT.classList.remove('show', 'error', 'loading', 'success'); // Hapus semua kelas dulu
+        MESSAGE_ELEMENT.className = 'message show ' + type;
+        
+        if (type !== 'loading') {
+            setTimeout(() => MESSAGE_ELEMENT.classList.remove('show'), 5000);
+        }
+    }
+    
+    async function sendApiRequest(action, data = {}) {
+        const payload = { action, ...data };
+        
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                // PENTING: Gunakan text/plain untuk Apps Script Web App API
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
+                body: JSON.stringify(payload)
+            });
+
+            // Handle respons jika HTTP status bukan 200 (seperti 404, 500, dll.)
+            if (!response.ok) {
+                 // Throw error untuk ditangkap di catch block
+                throw new Error(`HTTP Error: ${response.status} ${response.statusText}`); 
+            }
+            
+            const responseText = await response.text();
+            const responseData = JSON.parse(responseText);
+
+            // Cek status error di body JSON Apps Script
+            if (responseData.status === 'error') {
+                throw new Error(responseData.message || 'API Gagal');
+            }
+            return responseData;
+
+        } catch (error) {
+            console.error("API Request Failed:", error);
+            // Melempar kembali error untuk ditangani oleh pemanggil
+            throw new Error(error.message || 'Koneksi Gagal');
+        }
+    }
+
+    // --- LOGIKA UTAMA ---
+
+    async function loadTokoList() {
+        displayMessage('⏳ Memuat daftar toko...', 'loading');
+        try {
+            const data = await sendApiRequest('getTokoList');
+            
+            TOKO_SELECT.innerHTML = '<option value="" disabled selected>-- Pilih Toko Anda --</option>';
+            if (data.tokoList && data.tokoList.length > 0) {
+                data.tokoList.forEach(toko => {
+                    const option = document.createElement('option');
+                    option.value = toko.nama;
+                    option.textContent = toko.nama;
+                    TOKO_SELECT.appendChild(option);
+                });
+                displayMessage('✅ Daftar toko siap.', 'success');
+            } else {
+                displayMessage('⚠️ Tidak ada toko terdaftar di Sheet "Toko".', 'error');
+            }
+        } catch (err) {
+            TOKO_SELECT.innerHTML = '<option value="" disabled selected>Gagal memuat toko</option>';
+            displayMessage('❌ Gagal memuat daftar toko. Cek koneksi & API: ' + err.message, 'error');
+        }
+    }
+
+    // Handler Submit Form Login
+    LOGIN_FORM.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const nama = document.getElementById('nama').value.trim();
+        const toko = TOKO_SELECT.value;
+
+        if (!nama || !toko) {
+            displayMessage('❌ Harap isi Toko dan Nama.', 'error');
+            return;
+        }
+
+        displayMessage('⏳ Memeriksa akses...', 'loading');
+        
+        try {
+            const data = await sendApiRequest('login', { nama, toko });
+            
+            // Login Sukses: Simpan data sesi
+            sessionStorage.setItem('userSession', JSON.stringify(data.user));
+
+            displayMessage('✅ ' + data.message + '. Mengarahkan...', 'success');
+            
+            // Arahkan ke halaman input utama setelah 1 detik
+            setTimeout(() => {
+                window.location.href = './main.html'; // GANTI JIKA NAMA FILE BEDA
+            }, 1000);
+            
+        } catch (err) {
+            displayMessage('❌ Akses Ditolak: ' + err.message, 'error');
+        }
+    });
+
+    // Cek Sesi Saat Halaman Dimuat
+    document.addEventListener('DOMContentLoaded', () => {
+         // Cek apakah user sudah login, jika ya, langsung redirect
+         if (sessionStorage.getItem('userSession')) {
+            window.location.href = './main.html'; // GANTI JIKA NAMA FILE BEDA
+            return;
+         }
+         loadTokoList();
+    });
+</script>
+</body>
+</html>
