@@ -57,11 +57,10 @@
 
 <script>
     // =======================================================
-    // 🔑 WAJIB GANTI DENGAN URL DEPLOYMENT APPS SCRIPT TERBARU 🔑
+    // 🔑 WAJIB GANTI DENGAN URL DEPLOYMENT APPS SCRIPT TERBARU ANDA 🔑
     // =======================================================
-    const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwJeCR69dDBiRZp_y4z9TuHkOrMotBwvvrEv9qFV_KFUaHaQt94jdEcFOXBrFAOWVsa6Q/exec'; 
+    const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwlLnOkgiAx_ZkGVWA_O1xO3ra_rSM7p4qCfbjFsgAkif6OqPznIa5pYuHkXExYljM/exec'; 
     
-    // Gunakan URL GAS sebagai URL default
     const API_URL = GAS_API_URL;
     
     // DOM Elements
@@ -88,14 +87,14 @@
         const cacheBuster = `?t=${new Date().getTime()}`;
         const targetUrl = GAS_API_URL + cacheBuster;
 
-        // 🔑 IMPLEMENTASI PROXY CORS 🔑
-        const PROXY_SERVER = 'https://corsproxy.io/?'; 
+        // 🔑 IMPLEMENTASI PROXY CORS FINAL (Menggunakan allorigins) 🔑
+        const PROXY_SERVER = 'https://api.allorigins.win/raw?url='; 
         const urlWithProxy = PROXY_SERVER + encodeURIComponent(targetUrl);
         
         try {
             const response = await fetch(urlWithProxy, {
                 method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
+                // ❗ PENTING: Header Content-Type DIHAPUS
                 body: JSON.stringify(payload)
             });
 
@@ -104,16 +103,21 @@
             }
             
             const responseText = await response.text();
-            const responseData = JSON.parse(responseText);
+            
+            try {
+                const responseData = JSON.parse(responseText);
 
-            if (responseData.status === 'error') {
-                throw new Error(responseData.message || 'API Gagal');
+                if (responseData.status === 'error') {
+                    throw new Error(responseData.message || 'API Gagal');
+                }
+                return responseData;
+            } catch (e) {
+                 throw new Error('Respons dari Apps Script tidak valid: ' + responseText);
             }
-            return responseData;
 
         } catch (error) {
             console.error("API Request Failed:", error);
-            throw new Error(error.message || 'Koneksi ke Apps Script via Proxy Gagal. Cek koneksi Anda.');
+            throw new Error(error.message || 'Koneksi ke Apps Script via Proxy Gagal.');
         }
     }
 
@@ -156,12 +160,10 @@
         displayMessage('⏳ Mengirim permintaan...', 'loading');
         
         try {
-            // Aksi di Apps Script adalah 'saveSignup'
             const data = await sendApiRequest('saveSignup', { nama, toko });
             
             displayMessage('✅ ' + data.message, 'success');
             
-            // Opsional: Bersihkan form setelah sukses
             SIGNUP_FORM.reset();
             
         } catch (err) {
