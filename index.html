@@ -55,10 +55,12 @@
 
 <script>
     // =======================================================
-    // 🔑 GANTI DENGAN URL API EKSEKUSI TERBARU ANDA 🔑
+    // 🔑 WAJIB GANTI DENGAN URL DEPLOYMENT APPS SCRIPT TERBARU 🔑
     // =======================================================
-// GANTI DENGAN URL API LENGKAP BARU INI
-const API_URL = 'https://script.google.com/macros/s/AKfycbz8pHueOVdBs4JbLqrtEDJGkpBg2yNy5OLf9rdpA5nFtQeG74zioTA9DMCdjlZgeJXFVQ/exec';
+    const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwJeCR69dDBiRZp_y4z9TuHkOrMotBwvvrEv9qFV_KFUaHaQt94jdEcFOXBrFAOWVsa6Q/exec'; 
+    
+    // Gunakan URL GAS sebagai URL default
+    const API_URL = GAS_API_URL;
     
     // DOM Elements
     const LOGIN_FORM = document.getElementById('loginForm');
@@ -82,11 +84,15 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbz8pHueOVdBs4JbLqrtEDJG
         
         // Solusi Cache-Buster
         const cacheBuster = `?t=${new Date().getTime()}`;
-        // Menggabungkan URL API (yang sekarang harusnya adalah Exec API) dengan cache-buster
-        const urlWithBuster = API_URL + cacheBuster;
+        const targetUrl = GAS_API_URL + cacheBuster;
 
+        // 🔑 IMPLEMENTASI PROXY CORS 🔑
+        const PROXY_SERVER = 'https://corsproxy.io/?'; 
+        // Menggabungkan Proxy + URL Apps Script yang di-enkode
+        const urlWithProxy = PROXY_SERVER + encodeURIComponent(targetUrl);
+        
         try {
-            const response = await fetch(urlWithBuster, {
+            const response = await fetch(urlWithProxy, { // Panggil URL Proxy
                 method: 'POST',
                 // PENTING: Gunakan text/plain untuk Apps Script Web App API
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
@@ -94,7 +100,8 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbz8pHueOVdBs4JbLqrtEDJG
             });
 
             if (!response.ok) {
-                throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
+                // Ini akan menangkap kegagalan koneksi proxy atau status error dari GAS
+                throw new Error(`Permintaan API Gagal. Status: ${response.status}`);
             }
             
             const responseText = await response.text();
@@ -107,11 +114,8 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbz8pHueOVdBs4JbLqrtEDJG
 
         } catch (error) {
             console.error("API Request Failed:", error);
-            // Menambahkan pesan khusus untuk memandu debugging CORS
-            if (error.message.includes("Failed to fetch") || error.message.includes("No 'Access-Control-Allow-Origin' header is present")) {
-                 throw new Error("Koneksi API Gagal. Pastikan Apps Script DEPLOYMENT IZINNYA 'Anyone'!");
-            }
-            throw new Error(error.message || 'Koneksi Gagal');
+            // Memberi tahu user jika masalahnya adalah koneksi
+            throw new Error(error.message || 'Koneksi ke Apps Script via Proxy Gagal. Cek koneksi Anda.');
         }
     }
 
@@ -163,7 +167,7 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbz8pHueOVdBs4JbLqrtEDJG
             
             // Arahkan ke halaman input utama setelah 1 detik
             setTimeout(() => {
-                window.location.href = './main.html'; 
+                window.location.href = './main.html'; // GANTI JIKA NAMA FILE BEDA
             }, 1000);
             
         } catch (err) {
