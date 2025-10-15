@@ -55,11 +55,10 @@
 
 <script>
     // =======================================================
-    // 🔑 WAJIB GANTI DENGAN URL DEPLOYMENT APPS SCRIPT TERBARU 🔑
+    // 🔑 WAJIB GANTI DENGAN URL DEPLOYMENT APPS SCRIPT TERBARU ANDA 🔑
     // =======================================================
-    const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwJeCR69dDBiRZp_y4z9TuHkOrMotBwvvrEv9qFV_KFUaHaQt94jdEcFOXBrFAOWVsa6Q/exec'; 
+    const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwlLnOkgiAx_ZkGVWA_O1xO3ra_rSM7p4qCfbjFsgAkif6OqPznIa5pYuHkXExYljM/exec'; 
     
-    // Gunakan URL GAS sebagai URL default
     const API_URL = GAS_API_URL;
     
     // DOM Elements
@@ -86,36 +85,41 @@
         const cacheBuster = `?t=${new Date().getTime()}`;
         const targetUrl = GAS_API_URL + cacheBuster;
 
-        // 🔑 IMPLEMENTASI PROXY CORS 🔑
-        const PROXY_SERVER = 'https://corsproxy.io/?'; 
-        // Menggabungkan Proxy + URL Apps Script yang di-enkode
+        // 🔑 IMPLEMENTASI PROXY CORS FINAL (Menggunakan allorigins) 🔑
+        const PROXY_SERVER = 'https://api.allorigins.win/raw?url='; 
         const urlWithProxy = PROXY_SERVER + encodeURIComponent(targetUrl);
         
         try {
             const response = await fetch(urlWithProxy, { // Panggil URL Proxy
                 method: 'POST',
-                // PENTING: Gunakan text/plain untuk Apps Script Web App API
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
-                body: JSON.stringify(payload)
+                // ❗ PENTING: Header Content-Type DIHAPUS agar proxy tidak memblokir (403/400)
+                body: JSON.stringify(payload) 
             });
 
             if (!response.ok) {
-                // Ini akan menangkap kegagalan koneksi proxy atau status error dari GAS
+                // Ini akan menangkap kegagalan 403 atau 400 dari Proxy
                 throw new Error(`Permintaan API Gagal. Status: ${response.status}`);
             }
             
             const responseText = await response.text();
-            const responseData = JSON.parse(responseText);
+            
+            // Perlu penanganan khusus untuk AllOrigins yang terkadang mengembalikan JSON dengan status error
+            try {
+                const responseData = JSON.parse(responseText);
 
-            if (responseData.status === 'error') {
-                throw new Error(responseData.message || 'API Gagal');
+                if (responseData.status === 'error') {
+                    throw new Error(responseData.message || 'API Gagal');
+                }
+                return responseData;
+            } catch (e) {
+                 // Jika parsing JSON gagal, mungkin respons dari GAS tidak valid
+                 throw new Error('Respons dari Apps Script tidak valid: ' + responseText);
             }
-            return responseData;
+            
 
         } catch (error) {
             console.error("API Request Failed:", error);
-            // Memberi tahu user jika masalahnya adalah koneksi
-            throw new Error(error.message || 'Koneksi ke Apps Script via Proxy Gagal. Cek koneksi Anda.');
+            throw new Error(error.message || 'Koneksi ke Apps Script via Proxy Gagal.');
         }
     }
 
@@ -167,7 +171,7 @@
             
             // Arahkan ke halaman input utama setelah 1 detik
             setTimeout(() => {
-                window.location.href = './main.html'; // GANTI JIKA NAMA FILE BEDA
+                window.location.href = './main.html'; 
             }, 1000);
             
         } catch (err) {
