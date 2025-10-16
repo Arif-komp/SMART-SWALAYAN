@@ -44,9 +44,14 @@
 
         <form id="signupForm">
             <div class="input-group">
-                <label for="nama"><i class="fas fa-user"></i> Nama </label>
-                <input type="text" id="nama" name="nama" placeholder="Masukkan Nama Anda" required>
-            </div>
+    <label for="nama"><i class="fas fa-user"></i> Nama </label>
+    <input type="text" 
+        id="nama" 
+        name="nama" 
+        placeholder="Masukkan Nama Anda" 
+        required
+        oninput="this.value = this.value.toUpperCase()">
+</div>
 
             <div class="input-group">
                 <label for="toko"><i class="fas fa-store"></i> Toko</label>
