@@ -4,425 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SMART SWALAYAN - TRANSAKSI</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght+300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://unpkg.com/@zxing/library@latest"></script>
     
     <style>
-        /* ========================================= */
-        /* CSS: GAYA SMART SWALAYAN (Sesuai Permintaan) */
-        /* ========================================= */
-
-        /* --- START: 1. DEKLARASI VARIABEL & FONT --- */
-        :root {
-            --primary-color: #00796b; /* Teal Dark - Warna Utama */
-            --secondary-color: #ff9800; /* Orange - Warna Aksi/Submit */
-            --danger-color: #f44336; /* Merah - Warna Minus/Bahaya */
-            --text-color: #333;
-            --bg-color: #eceff1; /* Background Abu-abu Muda */
-            --card-bg: #ffffff;
-            --border-radius: 12px;
-            --shadow-heavy: 0 10px 30px rgba(0, 0, 0, 0.15);
-            --shadow-light: 0 4px 10px rgba(0, 0, 0, 0.08);
-            --sparkle-color: #ffe082; /* Warna kuning muda untuk sparkle */
-            --scan-glow-color: #00ff00; /* Warna hijau neon untuk garis scan */
-
-            /* Variabel Sparkle dinamis, diatur oleh JavaScript */
-            --mouse-x: 50%;
-            --mouse-y: 50%;
-        }
-        
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Poppins', sans-serif;
-        }
-        
-        /* --- END: 1. DEKLARASI VARIABEL & FONT --- */
-        
-        /* ------------------------------------------- */
-        
-        /* --- START: 2. BODY & CONTAINER LAYOUT --- */
-        body {
-            background-color: var(--bg-color);
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
-            padding: 20px;
-            color: var(--text-color);
-        }
-        
-        .container {
-            background-color: var(--card-bg);
-            padding: 30px;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-heavy);
-            width: 100%;
-            max-width: 450px;
-            margin-top: 20px;
-            transition: all 0.3s ease;
-        }
-        
-        /* --- END: 2. BODY & CONTAINER LAYOUT --- */
-        
-        /* ------------------------------------------- */
-        
-        /* --- START: 3. HEADER & LOGO --- */
-        .header-logo {
-            display: block;
-            width: auto;
-            max-width: 100%;
-            height: auto;
-            max-height: 90px;
-            object-fit: contain;
-            margin: 0 auto 25px auto;
-            border-radius: 10px;
-            border: 3px solid var(--primary-color);
-            box-shadow: 0 0 15px rgba(0, 121, 107, 0.4);
-            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1));
-        }
-
-        .user-info {
-            background-color: #e0f2f1;
-            padding: 10px 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 0.9em;
-            color: var(--primary-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-weight: 600;
-        }
-
-        .user-info button {
-            background: none;
-            border: none;
-            color: var(--danger-color);
-            font-size: 1.1em;
-            padding: 5px;
-            cursor: pointer;
-        }
-        
-        /* --- END: 3. HEADER & LOGO --- */
-        
-        /* ------------------------------------------- */
-        
-        /* --- START: 4. INPUT GROUP & FIELD UMUM --- */
-        .input-group {
-            margin-bottom: 20px;
-        }
-        
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: var(--primary-color);
-            font-weight: 700;
-            font-size: 0.95em;
-        }
-        
-        .input-group label i {
-            margin-right: 5px;
-            color: var(--secondary-color);
-        }
-        
-        input[type="text"],
-        input[type="number"],
-        input[type="date"] {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 1em;
-            color: var(--text-color);
-            transition: all 0.3s;
-        }
-        
-        input:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 4px rgba(0, 121, 107, 0.2);
-            background-color: #f7fcfc;
-            outline: none;
-        }
-        
-        /* --- END: 4. INPUT GROUP & FIELD UMUM --- */
-        
-        /* ------------------------------------------- */
-        
-        /* --- START: 5. INPUT DENGAN TOMBOL (Barcode & QTY) --- */
-        .input-with-icon {
-            display: flex;
-            align-items: stretch;
-        }
-        
-        .input-with-icon input {
-            flex-grow: 1;
-            /* Hapus border radius di kanan untuk input yang diapit tombol */
-            border-radius: 8px 0 0 8px; 
-            border-right: none;
-        }
-        
-        /* --- END: 5. INPUT DENGAN TOMBOL (Barcode & QTY) --- */
-        
-        /* ------------------------------------------- */
-        
-        /* --- START: 6. TOMBOL (Buttons) --- */
-        button {
-            cursor: pointer;
-            border: none;
-            font-weight: 600;
-            transition: background-color 0.3s, transform 0.1s, box-shadow 0.3s;
-            white-space: nowrap;
-            padding: 12px 15px;
-            font-size: 1.0em;
-            min-width: 40px;
-        }
-
-        .scan-btn, .minus-btn {
-            color: white;
-            border-radius: 0 8px 8px 0;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            min-width: 80px; /* Lebar minimum untuk tombol SCAN */
-        }
-        
-        .scan-btn {
-            background-color: var(--primary-color);
-        }
-        
-        .scan-btn:hover {
-            background-color: #004d40;
-        }
-        
-        .minus-btn {
-            background-color: var(--danger-color);
-            padding: 12px 18px;
-            min-width: 50px; /* Lebar minimum untuk tombol Minus */
-        }
-        
-        .minus-btn:hover {
-            background-color: #d32f2f;
-        }
-        
-        .scan-btn:active, .minus-btn:active, .save-btn:active {
-            transform: scale(0.98);
-        }
-        
-        /* Tombol Submit */
-        .save-btn {
-            width: 100%;
-            padding: 15px 20px;
-            background-color: var(--secondary-color);
-            color: white;
-            border-radius: 10px;
-            font-size: 1.15em;
-            font-weight: 700;
-            margin-top: 30px;
-            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4);
-        }
-        
-        .save-btn:hover {
-            background-color: #fb8c00;
-        }
-        
-        /* --- END: 6. TOMBOL (Buttons) --- */
-        
-        /* ------------------------------------------- */
-        
-        /* --- START: 7. AREA SCANNER (Kamera & Radar Line) --- */
-        .scanner-placeholder {
-            margin-top: 15px;
-            width: 100%;
-            padding-bottom: 60%; /* Rasio aspek 16:10 */
-            position: relative;
-            background-color: #1a1a1a;
-            border: 3px solid #ccc;
-            border-radius: 10px;
-            display: none; /* Default tersembunyi */
-            overflow: hidden;
-            transition: border-color 0.3s, background-color 0.3s;
-        }
-
-        /* --- AKTIFKAN SCANNER (Saat class 'active' ditambahkan) --- */
-        .scanner-placeholder.active {
-            display: block;
-            border-color: var(--primary-color);
-            background-color: #000;
-            /* Efek SPARKLE/GLOW yang mengikuti mouse/touch */
-            background-image: radial-gradient(
-                circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-                var(--sparkle-color) 0%,
-                rgba(0, 0, 0, 0) 25%
-            );
-        }
-        
-        .scanner-placeholder p {
-            color: #aaa;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            padding: 10px;
-            z-index: 10;
-        }
-        
-        #video-feed {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            z-index: 5;
-        }
-        
-        /* ELEMEN RADAR HIJAU BERANIMASI (Neon Line) */
-        .scanner-line {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 5px; 
-            background: linear-gradient(to right,
-                transparent 0%,
-                var(--scan-glow-color) 30%,
-                var(--scan-glow-color) 70%,
-                transparent 100%);
-            box-shadow: 0 0 10px 5px rgba(0, 255, 0, 0.5), 
-                0 0 20px 8px rgba(0, 255, 0, 0.2);
-            z-index: 50;
-            display: none; /* Hanya tampil saat .active */
-        }
-        
-        /* Kotak Fokus (Viewfinder) */
-        .scanner-placeholder.active::after {
-            content: '';
-            position: absolute;
-            width: 90%;
-            height: 80%;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            border: 2px solid rgba(76, 175, 80, 0.5);
-            z-index: 10;
-            pointer-events: none;
-        }
-        
-        /* Aktivasi Radar & Animasi */
-        .scanner-placeholder.active .scanner-line {
-            display: block;
-            animation: scan-radar 2s infinite linear;
-        }
-        
-        /* Keyframes untuk Animasi Radar (Garis Bergerak Naik-Turun) */
-        @keyframes scan-radar {
-            0% {
-                transform: translateY(0);
-                opacity: 0.1;
-            }
-            55% {
-                transform: translateY(calc(100% - 5px)); 
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(0);
-                opacity: 0.1;
-            }
-        }
-        
-        /* --- END: 7. AREA SCANNER (Kamera & Radar Line) --- */
-        
-        /* ------------------------------------------- */
-        
-        /* --- START: 8. MESSAGE DISPLAY --- */
-        .message {
-            text-align: center;
-            margin-top: 20px;
-            padding: 12px;
-            border-radius: 8px;
-            font-weight: 600;
-            /* Default: Success look */
-            background-color: #e8f5e9;
-            color: #2e7d32;
-            border: 1px solid #c8e6c9; 
-            opacity: 0;
-            transition: opacity 0.5s, transform 0.5s;
-            transform: translateY(10px);
-        }
-        
-        /* Tambahkan kelas untuk Error, jika dibutuhkan oleh JS */
-        .message.error {
-            background-color: #fce4e4; /* Light red */
-            color: #c62828;      /* Dark red */
-            border-color: #ef9a9a;
-        }
-
-        .message.loading {
-             background-color: #fffde7; /* Light yellow */
-            color: #fbc02d;      /* Dark yellow */
-            border-color: #fff9c4;
-        }
-        
-        .message.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        
-        /* --- END: 8. MESSAGE DISPLAY --- */
-        
-        /* ------------------------------------------- */
-
-        /* --- START: 9. COPYRIGHT FOOTER --- */
-        .footer-copyright {
-            margin-top: 20px;
-            padding-top: 10px;
-            border-top: 1px solid #ddd;
-            text-align: center;
-            font-size: 0.75em;
-            color: #777;
-        }
-        /* --- END: 9. COPYRIGHT FOOTER --- */
-        
-        /* ------------------------------------------- */
-        
-        /* --- START: 10. RESPONSIVE ADJUSTMENTS (@media) --- */
-        @media (max-width: 600px) {
-            body {
-                padding: 10px;
-            }
-            .container {
-                padding: 20px;
-                margin-top: 0;
-                border-radius: 0;
-                box-shadow: none;
-            }
-        
-            .header-logo {
-                max-width: 250px; 
-                max-height: 80px;
-                margin-bottom: 20px;
-            }
-        
-            .input-group {
-                margin-bottom: 15px;
-            }
-        
-            input[type="text"],
-            input[type="date"],
-            .scan-btn,
-            .minus-btn {
-                padding: 10px;
-                font-size: 0.95em;
-            }
-        
-            .save-btn {
-                padding: 15px;
-                margin-top: 25px;
-            }
-        }
-        /* --- END: 10. RESPONSIVE ADJUSTMENTS (@media) --- */
+        /* CSS yang konsisten (disingkat untuk fokus pada JS) */
+        :root { --primary-color: #00796b; --secondary-color: #ff9800; --danger-color: #f44336; --text-color: #333; --bg-color: #eceff1; --card-bg: #ffffff; --border-radius: 12px; --shadow-heavy: 0 10px 30px rgba(0, 0, 0, 0.15); --sparkle-color: #ffe082; --scan-glow-color: #00ff00; --mouse-x: 50%; --mouse-y: 50%; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+        body { background-color: var(--bg-color); display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 20px; color: var(--text-color); }
+        .container { background-color: var(--card-bg); padding: 30px; border-radius: var(--border-radius); box-shadow: var(--shadow-heavy); width: 100%; max-width: 450px; margin-top: 20px; transition: all 0.3s ease; }
+        .header-logo { display: block; max-width: 100%; max-height: 90px; margin: 0 auto 25px auto; border-radius: 10px; border: 3px solid var(--primary-color); box-shadow: 0 0 15px rgba(0, 121, 107, 0.4); }
+        .user-info { background-color: #e0f2f1; padding: 10px 15px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9em; color: var(--primary-color); display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
+        .user-info button { background: none; border: none; color: var(--danger-color); font-size: 1.1em; padding: 5px; cursor: pointer; }
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; margin-bottom: 8px; color: var(--primary-color); font-weight: 700; font-size: 0.95em; }
+        input[type="text"], input[type="number"], input[type="date"] { width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 1em; color: var(--text-color); transition: all 0.3s; }
+        input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 4px rgba(0, 121, 107, 0.2); background-color: #f7fcfc; outline: none; }
+        .input-with-icon { display: flex; align-items: stretch; }
+        .input-with-icon input { flex-grow: 1; border-radius: 8px 0 0 8px; border-right: none; }
+        button { cursor: pointer; border: none; font-weight: 600; transition: background-color 0.3s, transform 0.1s, box-shadow 0.3s; white-space: nowrap; padding: 12px 15px; font-size: 1.0em; min-width: 40px; }
+        .scan-btn, .minus-btn { color: white; border-radius: 0 8px 8px 0; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); min-width: 80px; }
+        .scan-btn { background-color: var(--primary-color); }
+        .minus-btn { background-color: var(--danger-color); padding: 12px 18px; min-width: 50px; }
+        .save-btn { width: 100%; padding: 15px 20px; background-color: var(--secondary-color); color: white; border-radius: 10px; font-size: 1.15em; font-weight: 700; margin-top: 30px; box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4); }
+        .scanner-placeholder { margin-top: 15px; width: 100%; padding-bottom: 60%; position: relative; background-color: #1a1a1a; border: 3px solid #ccc; border-radius: 10px; display: none; overflow: hidden; }
+        .scanner-placeholder.active { display: block; border-color: var(--primary-color); background-color: #000; background-image: radial-gradient( circle at var(--mouse-x, 50%) var(--mouse-y, 50%), var(--sparkle-color) 0%, rgba(0, 0, 0, 0) 25% ); }
+        #video-feed { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 5; }
+        .scanner-line { position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: linear-gradient(to right, transparent 0%, var(--scan-glow-color) 30%, var(--scan-glow-color) 70%, transparent 100%); z-index: 50; display: none; }
+        .scanner-placeholder.active .scanner-line { display: block; animation: scan-radar 2s infinite linear; }
+        @keyframes scan-radar { 0% { transform: translateY(0); opacity: 0.1; } 55% { transform: translateY(calc(100% - 5px)); opacity: 1; } 100% { transform: translateY(0); opacity: 0.1; } }
+        .message { text-align: center; margin-top: 20px; padding: 12px; border-radius: 8px; font-weight: 600; background-color: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; opacity: 0; transition: opacity 0.5s, transform 0.5s; transform: translateY(10px); }
+        .message.error { background-color: #fce4e4; color: #c62828; border-color: #ef9a9a; }
+        .message.loading { background-color: #fffde7; color: #fbc02d; border-color: #fff9c4; }
+        .message.show { opacity: 1; transform: translateY(0); }
     </style>
 </head>
 <body>
@@ -438,7 +53,7 @@
 
             <div class="input-group">
                 <label for="lokasi"><i class="fas fa-warehouse"></i> Lokasi </label>
-                <input type="text" id="lokasi" name="lokasi" placeholder="Input Lokasi" required>
+                <input type="text" id="lokasi" name="lokasi" placeholder="Input Lokasi (misal: Rak A01)" required>
             </div>
 
             <div class="input-group barcode-group">
@@ -453,7 +68,7 @@
                 <div id="scanner-container" class="scanner-placeholder">
                     <video id="video-feed" playsinline></video>
                     <div class="scanner-line"></div> 
-                    <p id="scanner-message">Area Scanner Barcode (Akan menampilkan kamera saat scan aktif)</p>
+                    <p id="scanner-message">Area Scanner Barcode</p>
                 </div>
             </div>
 
@@ -463,10 +78,10 @@
                     <input type="text" 
                         id="qty" 
                         name="qty" 
-                        placeholder="Masukkan jumlah" 
+                        placeholder="Masukkan jumlah (+/-)" 
                         required
                         inputmode="decimal"
-                        pattern="^-?\d*$">
+                        pattern="^-?\d*\.?\d*$">
                         
                     <button type="button" id="minusButton" class="minus-btn" title="Klik untuk Tambah Tanda Minus">
                         <i class="fas fa-minus"></i>
@@ -487,49 +102,36 @@
     </div>
 
     <script>
-        // =========================================
-        // JAVASCRIPT LOGIC - SMART SWALAYAN (Kode ZXing)
-        // =========================================
-        
-        // --- PENTING: GANTI DENGAN URL APPS SCRIPT ANDA ---
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwxHpxK5NMNCTstnqTPfQsD-rJUDfTjeFWr_8QxryfaXxnU2mx5HxBDJyYzkhgrZ1b1pQ/exec'; 
+        // --- PENTING: GANTI DENGAN URL APPS SCRIPT ANDA (SAMA DENGAN INDEX.HTML) ---
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxaMNvF2TMiGUix4c74RNTctn6qCpvaRPYAm_jmbHT6LIWXOd2LLDLTgza085MPZj5GmQ/exec';
         // --- AKHIR PENTING ---
 
-        let userSession = null; // Variabel global untuk menyimpan sesi pengguna
+        let userSession = null; 
         let isScanning = false;
-        const codeReader = new ZXing.BrowserMultiFormatReader(); // Dibuat di luar DOMContentLoaded
+        const codeReader = new ZXing.BrowserMultiFormatReader(); 
 
-        // Fungsi Utilities (Sama seperti yang Anda sediakan)
+        // Fungsi Utilities
         function displayMessage(text, type = 'success') {
             const messageElement = document.getElementById('message');
             messageElement.textContent = text;
             messageElement.classList.remove('show', 'error', 'loading');
             
-            if (type === 'error') {
-                messageElement.classList.add('error');
-            } else if (type === 'loading') {
-                messageElement.classList.add('loading');
-            }
+            if (type === 'error') { messageElement.classList.add('error'); } 
+            else if (type === 'loading') { messageElement.classList.add('loading'); }
 
-            setTimeout(() => {
-                messageElement.classList.add('show');
-            }, 10); 
+            setTimeout(() => { messageElement.classList.add('show'); }, 10); 
 
             if (type !== 'loading') {
-                setTimeout(() => {
-                    messageElement.classList.remove('show');
-                }, 5000);
+                setTimeout(() => { messageElement.classList.remove('show'); }, 5000);
             }
         }
         
-        // Pengecekan Sesi dan Logika Logout (NEW)
+        // Pengecekan Sesi dan Logika Logout
         function checkUserSession() {
             const sessionData = sessionStorage.getItem('userSession');
             const userInfoText = document.getElementById('userInfoText');
-            const logoutButton = document.getElementById('logoutButton');
 
             if (!sessionData) {
-                // Tidak ada sesi, kembalikan ke halaman login
                 alert('Sesi habis atau belum login. Harap masuk kembali.');
                 window.location.href = './index.html'; 
                 return false;
@@ -537,10 +139,12 @@
 
             try {
                 userSession = JSON.parse(sessionData);
-                userInfoText.innerHTML = `<i class="fas fa-user-circle"></i> ${userSession.nama} (${userSession.toko})`;
+                
+                // Menampilkan Nama User dan Toko
+                userInfoText.innerHTML = `<i class="fas fa-user-circle"></i> ${userSession.nama} (${userSession.toko})`; 
+                
                 return true;
             } catch (e) {
-                // Data sesi rusak
                 sessionStorage.removeItem('userSession');
                 alert('Data sesi rusak. Harap masuk kembali.');
                 window.location.href = './index.html'; 
@@ -555,30 +159,63 @@
             window.location.href = './index.html';
         }
 
+        // Logika Scanner Barcode
+        const stopScanner = () => {
+            if (!isScanning) return;
+            isScanning = false;
+            codeReader.reset();
+            document.getElementById('scanner-container').classList.remove('active');
+            document.getElementById('video-feed').style.display = 'none';
+            document.getElementById('scanner-message').style.display = 'block';
+            document.getElementById('scanButton').innerHTML = '<i class="fas fa-camera-retro"></i> SCAN';
+        };
+
+        const startScanner = () => {
+            isScanning = true;
+            const scannerContainer = document.getElementById('scanner-container');
+            scannerContainer.classList.add('active');
+            document.getElementById('video-feed').style.display = 'block';
+            document.getElementById('scanner-message').style.display = 'none';
+            document.getElementById('scanButton').innerHTML = '<i class="fas fa-stop-circle"></i> STOP';
+            displayMessage('Mengaktifkan kamera... Arahkan ke barcode.', 'loading');
+            
+            codeReader.decodeFromVideoDevice(
+                undefined, 
+                'video-feed', 
+                (result, error) => {
+                    if (result) {
+                        const scannedCode = result.text;
+                        document.getElementById('barcode').value = scannedCode;
+                        stopScanner(); 
+                        displayMessage(`✅ Barcode ${scannedCode} berhasil di-scan!`);
+                        document.getElementById('qty').focus();
+                    } else if (error && !(error instanceof ZXing.NotFoundException)) {
+                        console.error('Scan Error:', error);
+                    }
+                },
+                { video: { facingMode: 'environment' } } 
+            ).catch(err => {
+                console.error('Kamera gagal diakses:', err);
+                stopScanner();
+                displayMessage('❌ Gagal mengakses kamera. Pastikan browser memiliki izin HTTPS.', 'error');
+            });
+        };
+
 
         document.addEventListener('DOMContentLoaded', () => {
-            // 1. Cek Sesi Pengguna
-            if (!checkUserSession()) {
-                return; // Berhenti jika sesi tidak valid
-            }
+            if (!checkUserSession()) { return; }
 
-            // 2. Inisialisasi Variabel DOM
             const form = document.getElementById('inventoryForm');
             const tanggalInput = document.getElementById('tanggal');
-            const barcodeInput = document.getElementById('barcode');
-            const lokasiInput = document.getElementById('lokasi');
             const qtyInput = document.getElementById('qty');
-            const scanButton = document.getElementById('scanButton');
-            const minusButton = document.getElementById('minusButton');
-            const scannerContainer = document.getElementById('scanner-container');
-            const videoFeed = document.getElementById('video-feed');
-            const scannerMessage = document.getElementById('scanner-message');
-            const copyrightContainer = document.getElementById('app-footer-copyright');
+            const lokasiInput = document.getElementById('lokasi');
             
-            // Tambahkan event listener untuk Logout
             document.getElementById('logoutButton').addEventListener('click', handleLogout);
+            document.getElementById('scanButton').addEventListener('click', () => {
+                if (isScanning) { stopScanner(); } else { startScanner(); }
+            });
 
-            // 3. Set Tanggal Otomatis
+            // Set Tanggal Otomatis
             const setTodayDate = () => {
                 const today = new Date();
                 const yyyy = today.getFullYear();
@@ -586,182 +223,61 @@
                 const dd = String(today.getDate()).padStart(2, '0');
                 tanggalInput.value = `${yyyy}-${mm}-${dd}`;
             };
-
             setTodayDate();
             lokasiInput.focus();
             
-            // =========================================
-            // 4. LOGIKA TOMBOL MINUS
-            // =========================================
-            minusButton.addEventListener('click', () => {
+            // Logika Tombol Minus
+            document.getElementById('minusButton').addEventListener('click', () => {
                 const value = qtyInput.value.trim();
-                
-                if (value.startsWith('-')) {
-                    qtyInput.value = value.substring(1); 
-                } else {
-                    qtyInput.value = '-' + value;
-                }
+                qtyInput.value = value.startsWith('-') ? value.substring(1) : '-' + value;
                 qtyInput.focus();
             });
 
-            // =========================================
-            // 5A. FUNGSI SPARKLE DINAMIS
-            // =========================================
-            const updateSparklePosition = (e) => {
-                if (!isScanning) return;
-                
-                let clientX, clientY;
-
-                if (e.touches && e.touches.length > 0) {
-                    clientX = e.touches[0].clientX;
-                    clientY = e.touches[0].clientY;
-                } else {
-                    clientX = e.clientX;
-                    clientY = e.clientY;
-                }
-
-                const rect = scannerContainer.getBoundingClientRect();
-                const x = (clientX - rect.left) / rect.width * 100;
-                const y = (clientY - rect.top) / rect.height * 100;
-
-                scannerContainer.style.setProperty('--mouse-x', `${x}%`);
-                scannerContainer.style.setProperty('--mouse-y', `${y}%`);
-            };
-
-            scannerContainer.addEventListener('mousemove', updateSparklePosition);
-            scannerContainer.addEventListener('touchmove', updateSparklePosition);
-            
-            // =========================================
-            // 5B. LOGIKA SCANNER BARCODE (ZXing)
-            // =========================================
-            
-            const stopScanner = () => {
-                if (!isScanning) return;
-                
-                isScanning = false;
-                codeReader.reset();
-                scannerContainer.classList.remove('active');
-                videoFeed.style.display = 'none';
-                scannerMessage.style.display = 'block';
-                scanButton.innerHTML = '<i class="fas fa-camera-retro"></i> SCAN';
-            };
-
-            const startScanner = () => {
-                isScanning = true;
-                scannerContainer.classList.add('active');
-                videoFeed.style.display = 'block';
-                scannerMessage.style.display = 'none';
-                scanButton.innerHTML = '<i class="fas fa-stop-circle"></i> STOP';
-                displayMessage('Mengaktifkan kamera... Arahkan ke barcode.', 'loading');
-                
-                codeReader.decodeFromVideoDevice(
-                    undefined, 
-                    'video-feed', 
-                    (result, error) => {
-                        if (result) {
-                            const scannedCode = result.text;
-                            barcodeInput.value = scannedCode;
-                            
-                            stopScanner(); 
-                            
-                            displayMessage(`✅ Barcode ${scannedCode} berhasil di-scan!`);
-                            
-                            qtyInput.focus();
-
-                        } else if (error && !(error instanceof ZXing.NotFoundException)) {
-                            console.error('Scan Error:', error);
-                        }
-                    },
-                    { video: { facingMode: 'environment' } } // simplified controls
-                ).catch(err => {
-                    console.error('Kamera gagal diakses:', err);
-                    stopScanner();
-                    displayMessage('❌ Gagal mengakses kamera. Pastikan browser memiliki izin HTTPS.', 'error');
-                });
-            };
-
-            scanButton.addEventListener('click', () => {
-                if (isScanning) {
-                    stopScanner();
-                } else {
-                    startScanner();
-                }
-            });
-
-
-            // =========================================
-            // 6. LOGIKA PENGIRIMAN FORM (Termasuk data User)
-            // =========================================
+            // Logika Pengiriman Form
             form.addEventListener('submit', (e) => {
                 e.preventDefault();
 
-                if (isScanning) {
-                    stopScanner();
-                }
+                if (isScanning) { stopScanner(); }
 
                 const data = {
-                    action: 'saveInventory', // NEW: Aksi yang harus ditangani oleh Apps Script
+                    action: 'saveInventory', 
                     lokasi: lokasiInput.value,
-                    barcode: barcodeInput.value,
+                    barcode: document.getElementById('barcode').value,
                     qty: qtyInput.value,
                     tanggal: tanggalInput.value,
-                    user: userSession ? userSession.nama : 'Unknown', // NEW: Ambil nama user dari sesi
-                    toko: userSession ? userSession.toko : 'Unknown'  // NEW: Ambil nama toko dari sesi
+                    user: userSession.nama, // Nama Pengguna
+                    toko: userSession.toko  // Nama Toko
                 };
 
-                if (!data.lokasi || !data.barcode || !data.qty) {
-                    displayMessage('❌ Harap isi semua kolom wajib.', 'error');
-                    return;
-                }
-
-                // --- OPTIMIS UI: RESET FORM INSTAN SEBELUM FETCH ---
                 displayMessage('⏳ Data sedang dikirim...', 'loading');
-                
-                // 1. Reset Form dan Fokus Instan
                 form.reset(); 
                 setTodayDate();
                 lokasiInput.focus();
                 
-                // 2. Siapkan data untuk pengiriman
                 const formData = new URLSearchParams(data).toString();
                 
-                // 3. Lakukan pengiriman data di latar belakang
+                // Menggunakan fetch dengan no-cors untuk Apps Script
                 fetch(SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'no-cors', 
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: formData, 
                 })
                 .then(() => {
-                    // Karena menggunakan no-cors, ini akan selalu resolve. Kita asumsikan sukses.
-                    displayMessage('✅ Transaksi berhasil disimpan (di latar belakang)!');
+                    // UI Optimis: Asumsi sukses karena no-cors tidak bisa baca status
+                    displayMessage('✅ Transaksi berhasil disimpan!');
                 })
                 .catch(error => {
                     console.error('Error saat fetch:', error);
-                    // Meskipun menggunakan no-cors, kita tetap tampilkan error jaringan
                     displayMessage('❌ Gagal mengirim data. Cek URL Apps Script atau koneksi.', 'error');
                 });
             });
 
-            // =========================================
-            // 7. LOGIKA COPYRIGHT
-            // =========================================
-            const currentYear = new Date().getFullYear();
-            const copyrightText = `© ${currentYear} Smart Swalayan.`;
-
-            if (copyrightContainer) {
-                copyrightContainer.textContent = copyrightText;
-            }
-            // =========================================
-
-            // Pastikan ZXing dihentikan jika jendela ditutup 
-            window.addEventListener('beforeunload', () => {
-                 if (isScanning) {
-                    codeReader.reset();
-                }
-            });
+            // Copyright
+            document.getElementById('app-footer-copyright').textContent = `© ${new Date().getFullYear()} Smart Swalayan.`;
+            
+            // Clean up ZXing
+            window.addEventListener('beforeunload', () => { if (isScanning) { codeReader.reset(); } });
         });
     </script>
 </body>
