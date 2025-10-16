@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
     <style>
+        /* CSS yang sama */
         :root { --primary-color: #00796b; --secondary-color: #ff9800; --danger-color: #f44336; --text-color: #333; --bg-color: #eceff1; --card-bg: #ffffff; --border-radius: 12px; --shadow-heavy: 0 10px 30px rgba(0, 0, 0, 0.15); }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
         body { background-color: var(--bg-color); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; color: var(--text-color); }
@@ -31,6 +32,7 @@
 
         .message { text-align: center; margin-top: 20px; padding: 12px; border-radius: 8px; font-weight: 600; opacity: 0; transition: opacity 0.5s, transform 0.5s; transform: translateY(10px); }
         .message.error { background-color: #fce4e4; color: #c62828; border-color: #ef9a9a; border: 1px solid; }
+        .message.success { background-color: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
         .message.loading { background-color: #fffde7; color: #fbc02d; border-color: #fff9c4; border: 1px solid; }
         .message.show { opacity: 1; transform: translateY(0); }
     </style>
@@ -39,20 +41,18 @@
     <div class="container">
         <img src="smart.jpg" alt="Logo Smart Swalayan" class="header-logo">
         <h1>SMART SWALAYAN</h1>
-        <p class="subtitle">SIGN IN</p>
+        <p class="subtitle">Aplikasi Input</p>
 
         <form id="loginForm">
             <div class="input-group">
-                <label for="username"><i class="fas fa-user"></i> Nama Pengguna</label>
-                <input type="text" id="username" name="username" placeholder="Masukkan Nama Anda" required>
+                <label for="nama"><i class="fas fa-user"></i> Nama Pengguna</label>
+                <input type="text" id="nama" name="nama" placeholder="Masukkan Nama Anda" required>
             </div>
 
             <div class="input-group">
                 <label for="toko"><i class="fas fa-store"></i> Toko</label>
                 <select id="toko" name="toko" required>
-                    <option value="">-- Pilih Toko --</option>
-                    <option value="SMART SWALAYAN BIMA">SMART SWALAYAN BIMA</option>
-                    <option value="DEPO TENTE">DEPO TENTE</option>
+                    <option value="">-- Memuat Toko... --</option>
                 </select>
             </div>
 
@@ -67,22 +67,19 @@
 
     <script>
         // --- PENTING: GANTI DENGAN URL APPS SCRIPT ANDA ---
-        const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwFhXRPAFqMgkweuIBuM1jZFq6Vj_AJ_kk4XIsdJk0-iEPF6oST5wmbELUrS0bMhqlKiw/exec';
+        const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbzD2sVr6PNXm18m2aYuK0nAynGZta_Ew3cd8UJwKDDbyRYfR9C1-ciEU6aTDv4oT_LuuA/exec';
         // --- AKHIR PENTING ---
 
         const LOGIN_FORM = document.getElementById('loginForm');
         const MESSAGE_ELEMENT = document.getElementById('message');
-        const USERNAME_INPUT = document.getElementById('username');
+        const NAMA_INPUT = document.getElementById('nama');
+        const TOKO_SELECT = document.getElementById('toko');
 
         function displayMessage(text, type = 'error') {
             MESSAGE_ELEMENT.textContent = text;
-            MESSAGE_ELEMENT.classList.remove('show', 'error', 'loading');
+            MESSAGE_ELEMENT.classList.remove('show', 'error', 'loading', 'success');
             
-            if (type === 'loading') {
-                MESSAGE_ELEMENT.classList.add('loading');
-            } else {
-                MESSAGE_ELEMENT.classList.add('error');
-            }
+            MESSAGE_ELEMENT.classList.add(type);
 
             setTimeout(() => {
                 MESSAGE_ELEMENT.classList.add('show');
@@ -95,18 +92,25 @@
             }
         }
         
-        async function sendApiRequest(action, data = {}) {
+        async function sendApiRequest(action, data = {}, method = 'POST') {
             const payload = { action, ...data };
             const cacheBuster = `?t=${new Date().getTime()}`; 
-            const targetUrl = GAS_API_URL + cacheBuster; 
-            const bodyData = new URLSearchParams(payload).toString();
-
-            const response = await fetch(targetUrl, { 
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, 
-                body: bodyData
-            });
+            let targetUrl = GAS_API_URL + cacheBuster; 
             
+            const options = {
+                method: method,
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            };
+            
+            if (method === 'POST') {
+                options.body = new URLSearchParams(payload).toString();
+            } else if (method === 'GET') {
+                const searchParams = new URLSearchParams(payload);
+                targetUrl += '&' + searchParams.toString();
+                delete options.body; 
+            }
+
+            const response = await fetch(targetUrl, options);
             const responseText = await response.text();
             
             try {
@@ -123,14 +127,39 @@
                  throw new Error('Respons Apps Script tidak valid. Cek konfigurasi Apps Script/izin.');
             }
         }
+        
+        async function loadTokoList() {
+            TOKO_SELECT.innerHTML = '<option value="">-- Memuat Toko... --</option>';
+            try {
+                const response = await sendApiRequest('getTokoList', {}, 'GET'); 
+                const tokoList = response.tokoList || [];
+                
+                TOKO_SELECT.innerHTML = '<option value="">-- Pilih Toko --</option>';
+                tokoList.forEach(toko => {
+                    const option = document.createElement('option');
+                    option.value = toko;
+                    option.textContent = toko;
+                    TOKO_SELECT.appendChild(option);
+                });
+
+                if (tokoList.length === 0) {
+                     TOKO_SELECT.innerHTML = '<option value="">-- Tidak Ada Toko Ditemukan --</option>';
+                     displayMessage('❌ Gagal: Tidak ada toko terdaftar. Harap hubungi administrator sistem.', 'error');
+                }
+                
+            } catch (error) {
+                TOKO_SELECT.innerHTML = '<option value="">-- GAGAL MEMUAT --</option>';
+                displayMessage('❌ Gagal memuat daftar toko: ' + error.message, 'error');
+            }
+        }
 
         async function handleLogin(e) {
             e.preventDefault();
             
-            const username = USERNAME_INPUT.value.trim();
+            const nama = NAMA_INPUT.value.trim();
             const toko = document.getElementById('toko').value;
 
-            if (!username || !toko) {
+            if (!nama || !toko) {
                 displayMessage('Nama Pengguna dan Toko harus diisi.', 'error');
                 return;
             }
@@ -139,7 +168,7 @@
             document.getElementById('loginButton').disabled = true;
 
             try {
-                const data = { username, toko };
+                const data = { nama, toko };
                 const response = await sendApiRequest('login', data);
                 
                 // Simpan sesi pengguna
@@ -151,6 +180,7 @@
                 } else if (response.user.status === 'AKTIF') {
                     window.location.href = './main.html';
                 } else {
+                    // Seharusnya sudah terhandle di Apps Script, tapi sebagai fallback
                     displayMessage(`Akun Anda berstatus ${response.user.status}. Mohon hubungi admin.`, 'error');
                     localStorage.removeItem('userSession');
                 }
@@ -162,7 +192,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-             // Cek jika sudah ada sesi aktif, langsung arahkan (opsional)
+             // Cek jika sudah ada sesi aktif
             const session = localStorage.getItem('userSession');
             if (session) {
                 const user = JSON.parse(session);
@@ -172,6 +202,8 @@
                     window.location.href = './main.html';
                 }
             }
+            
+            loadTokoList();
             LOGIN_FORM.addEventListener('submit', handleLogin);
         });
     </script>
