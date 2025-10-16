@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
     <style>
+        /* CSS yang sama */
         :root { --primary-color: #00796b; --secondary-color: #ff9800; --danger-color: #f44336; --text-color: #333; --bg-color: #eceff1; --card-bg: #ffffff; --border-radius: 12px; --shadow-heavy: 0 10px 30px rgba(0, 0, 0, 0.15); }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
         body { background-color: var(--bg-color); display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 20px; color: var(--text-color); }
@@ -90,7 +91,7 @@
 
     <script>
         // --- PENTING: GANTI DENGAN URL APPS SCRIPT ANDA ---
-        const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwFhXRPAFqMgkweuIBuM1jZFq6Vj_AJ_kk4XIsdJk0-iEPF6oST5wmbELUrS0bMhqlKiw/exec';
+        const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbzD2sVr6PNXm18m2aYuK0nAynGZta_Ew3cd8UJwKDDbyRYfR9C1-ciEU6aTDv4oT_LuuA/exec';
         // --- AKHIR PENTING ---
 
         const USER_INFO_TEXT = document.getElementById('userInfoText');
@@ -101,20 +102,17 @@
         
         let userSession = null;
         let originalUsers = []; 
-        let updatedStatuses = {}; // Objek untuk menyimpan perubahan status
+        let updatedStatuses = {}; 
+        
+        // Daftar toko yang relevan untuk Admin/Sub Admin
+        let relevantTokoList = []; 
 
         // --- UTILITY FUNCTIONS ---
         function displayMessage(text, type = 'success') {
             MESSAGE_ELEMENT.textContent = text;
             MESSAGE_ELEMENT.classList.remove('show', 'error', 'loading', 'success');
             
-            if (type === 'error') {
-                MESSAGE_ELEMENT.classList.add('error');
-            } else if (type === 'loading') {
-                MESSAGE_ELEMENT.classList.add('loading');
-            } else {
-                MESSAGE_ELEMENT.classList.add('success');
-            }
+            MESSAGE_ELEMENT.classList.add(type);
 
             setTimeout(() => {
                 MESSAGE_ELEMENT.classList.add('show');
@@ -127,7 +125,7 @@
             }
         }
         
-        async function sendApiRequest(action, data = {}) {
+        async function sendApiRequest(action, data = {}, method = 'POST') {
             const payload = { action, ...data };
             const cacheBuster = `?t=${new Date().getTime()}`; 
             const targetUrl = GAS_API_URL + cacheBuster; 
@@ -174,7 +172,6 @@
             
             const user = JSON.parse(session);
             
-            // HANYA MASTER/SUB_ADMIN yang boleh di halaman ini
             if (user.status !== 'MASTER' && user.status !== 'SUB_ADMIN') {
                 alert(`Akses Ditolak. Status Anda: ${user.status}. Anda akan diarahkan ke Halaman Input.`);
                 window.location.href = './main.html';
@@ -192,10 +189,19 @@
             displayMessage('⏳ Memuat data pengguna...', 'loading');
             USER_TABLE_BODY.innerHTML = '<tr><td colspan="3" style="text-align: center;">Memuat data pengguna...</td></tr>';
             SAVE_BUTTON.disabled = true;
+            
+            const isAdminMaster = userSession.status === 'MASTER';
 
             try {
-                const response = await sendApiRequest('getUsers');
+                const payload = {
+                    toko: userSession.toko,
+                    isAdminMaster: isAdminMaster
+                };
+                
+                const response = await sendApiRequest('getAdminUsers', payload);
+                
                 originalUsers = response.users;
+                relevantTokoList = response.tokoList;
                 renderUserTable(originalUsers);
                 displayMessage('✅ Data pengguna berhasil dimuat.', 'success');
             } catch (error) {
@@ -206,37 +212,47 @@
 
         function renderUserTable(users) {
             USER_TABLE_BODY.innerHTML = '';
-            users.forEach((user, index) => {
-                // Kunci unik untuk setiap baris
+            const isAdminMaster = userSession.status === 'MASTER';
+            
+            const statusOptions = ['AKTIF', 'PENDING', 'DITOLAK'];
+            if (isAdminMaster) {
+                statusOptions.unshift('MASTER', 'SUB_ADMIN');
+            } else {
+                statusOptions.unshift('SUB_ADMIN');
+            }
+            
+            users.forEach((user) => {
                 const userKey = `${user.nama}|${user.toko}`;
+                
+                // Cek otorisasi untuk menampilkan opsi MASTER/SUB_ADMIN
+                const canChangeToMaster = isAdminMaster;
+                const canChangeToSubAdmin = isAdminMaster || user.toko === userSession.toko;
+                
+                const selectHtml = statusOptions.map(status => {
+                    // Hanya master yang boleh mengubah MASTER
+                    if (status === 'MASTER' && !canChangeToMaster) return '';
+                    // Sub Admin hanya boleh mengubah SUB_ADMIN untuk toko sendiri
+                    if (status === 'SUB_ADMIN' && !canChangeToSubAdmin) return '';
+
+                    return `<option value="${status}" ${user.status === status ? 'selected' : ''}>${status}</option>`;
+                }).join('');
                 
                 const row = USER_TABLE_BODY.insertRow();
                 row.innerHTML = `
                     <td>${user.nama}</td>
                     <td>${user.toko}</td>
                     <td>
-                        <select class="status-select" data-index="${index}" data-key="${userKey}" data-original-status="${user.status}" value="${user.status}">
-                            <option value="MASTER" ${userSession.status !== 'MASTER' ? 'hidden' : ''}>MASTER</option>
-                            <option value="SUB_ADMIN" ${userSession.status === 'SUB_ADMIN' && user.toko !== userSession.toko ? 'hidden' : ''}>SUB_ADMIN</option>
-                            <option value="AKTIF">AKTIF</option>
-                            <option value="PENDING">PENDING</option>
-                            <option value="DITOLAK">DITOLAK</option>
+                        <select class="status-select" data-key="${userKey}" data-original-status="${user.status}" value="${user.status}">
+                            ${selectHtml}
                         </select>
                     </td>
                 `;
                 
-                // Set nilai awal dan tambahkan listener
                 const selectElement = row.querySelector('.status-select');
-                selectElement.value = user.status;
-                
-                // Tambahkan kelas warna CSS berdasarkan nilai
-                selectElement.classList.add(`status-select`);
-
-                // Filter opsi yang tidak dapat dipilih oleh SUB_ADMIN (kecuali toko sendiri)
-                
+                selectElement.value = user.status; // Set nilai awal
+                selectElement.setAttribute('value', user.status); // Set value attribute for CSS
                 selectElement.addEventListener('change', handleStatusChange);
             });
-            // Update tampilan tombol simpan setelah render
             updateSaveButtonState(); 
         }
 
@@ -244,9 +260,8 @@
             const select = e.target;
             const userKey = select.dataset.key;
             const newStatus = select.value;
-            const originalStatus = select.dataset.originalStatus;
+            const originalStatus = select.dataset.original-status;
 
-            // Update objek perubahan
             if (newStatus !== originalStatus) {
                 updatedStatuses[userKey] = {
                     nama: userKey.split('|')[0],
@@ -257,10 +272,8 @@
                 delete updatedStatuses[userKey];
             }
             
-            // Perbarui warna status
-            select.className = 'status-select'; // Reset classes
-            select.classList.add('status-select');
-            select.setAttribute('value', newStatus); // Set value attribute untuk styling CSS
+            select.className = 'status-select';
+            select.setAttribute('value', newStatus); 
 
             updateSaveButtonState();
         }
@@ -278,27 +291,20 @@
 
             const changesArray = Object.values(updatedStatuses);
 
-            if (changesArray.length === 0) {
-                displayMessage('Tidak ada perubahan untuk disimpan.', 'error');
-                return;
-            }
-
             displayMessage('⏳ Mengirim perubahan status...', 'loading');
             SAVE_BUTTON.disabled = true;
 
             try {
                 const data = { 
                     updates: JSON.stringify(changesArray), 
-                    admin: userSession.nama,
-                    adminStatus: userSession.status,
-                    adminToko: userSession.toko
+                    tokoAdmin: userSession.toko,
+                    isAdminMaster: userSession.status === 'MASTER' ? 'true' : 'false'
                 };
                 
                 const response = await sendApiRequest('updateUserStatus', data);
                 
                 displayMessage(`✅ ${response.message}`, 'success');
                 
-                // Reset dan muat ulang data untuk mendapatkan status terbaru
                 updatedStatuses = {};
                 await loadUsers(); 
 
@@ -316,7 +322,6 @@
             
             loadUsers();
 
-            // Event Listeners
             document.getElementById('logoutButton').addEventListener('click', () => {
                 localStorage.removeItem('userSession');
                 window.location.href = './index.html';
