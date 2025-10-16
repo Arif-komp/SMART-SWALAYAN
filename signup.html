@@ -13,12 +13,11 @@
         body { background-color: var(--bg-color); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
         .container { background-color: var(--card-bg); padding: 35px; border-radius: var(--border-radius); box-shadow: var(--shadow-heavy); width: 100%; max-width: 400px; }
         .header-logo { display: block; max-width: 100%; max-height: 80px; margin: 0 auto 25px auto; border: 3px solid var(--primary-color); border-radius: 10px; }
-        h2 { text-align: center; color: var(--primary-color); margin-bottom: 20px; font-weight: 700; font-size: 1.5em; }
         .input-group { margin-bottom: 20px; }
         label { display: block; margin-bottom: 8px; color: var(--primary-color); font-weight: 600; font-size: 0.9em; }
         input, select { width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 1em; }
         input:focus, select:focus { border-color: var(--primary-color); box-shadow: 0 0 0 4px rgba(0, 121, 107, 0.2); outline: none; }
-        .signup-btn { width: 100%; padding: 15px 20px; background-color: #4CAF50; /* Green color for signup */ color: white; border: none; border-radius: 10px; font-size: 1.1em; font-weight: 700; margin-top: 20px; cursor: pointer; box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4); }
+        .signup-btn { width: 100%; padding: 15px 20px; background-color: var(--primary-color); color: white; border: none; border-radius: 10px; font-size: 1.1em; font-weight: 700; margin-top: 20px; cursor: pointer; box-shadow: 0 5px 15px rgba(0, 121, 107, 0.4); }
         .message { text-align: center; margin-top: 15px; padding: 10px; border-radius: 8px; font-weight: 600; opacity: 0; transition: opacity 0.3s; }
         .message.show { opacity: 1; }
         .message.error { background-color: #fce4e4; color: #c62828; }
@@ -31,7 +30,6 @@
 <body>
     <div class="container">
         <img src="smart.jpg" alt="Logo Smart Swalayan" class="header-logo">
-        <h2>Permintaan Akses Baru</h2>
         
         <form id="signupForm">
             <div class="input-group">
@@ -43,25 +41,23 @@
             
             <div class="input-group">
                 <label for="nama"><i class="fas fa-user"></i> Nama Lengkap Anda</label>
-                <input type="text" id="nama" name="nama" placeholder="Nama Anda (untuk Admin)" required>
+                <input type="text" id="nama" name="nama" placeholder="Masukkan Nama Anda" required>
             </div>
 
-            <button type="submit" id="signupButton" class="signup-btn"><i class="fas fa-user-plus"></i> KIRIM PERMINTAAN</button>
+            <button type="submit" id="signupButton" class="signup-btn"><i class="fas fa-user-plus"></i> AJUKAN DAFTAR</button>
             <p id="message" class="message"></p>
         </form>
         
         <p class="link-footer">
-            Sudah punya akses? Kembali ke halaman <a href="./index.html"><b>MASUK</b></a>
+            Sudah punya akun? Klik <a href="./index.html"><b>MASUK</b></a>
         </p>
     </div>
 
 <script>
     // =======================================================
     // 🔑 GANTI DENGAN URL DEPLOYMENT APPS SCRIPT TERBARU ANDA 🔑
-    // =======================================================
-    const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwfCNN3nOThq_zg04IzcrtzLcu4F1UnwUokQUwH0J9FBhH-tEvCAxxqBALK2tX23ziC5Q/exec'; 
-    
-    const API_URL = GAS_API_URL;
+    // Contoh placeholder URL:
+    const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwxHpxK5NMNCTstnqTPfQsD-rJUDfTjeFWr_8QxryfaXxnU2mx5HxBDJyYzkhgrZ1b1pQ/exec'; 
     
     // DOM Elements
     const SIGNUP_FORM = document.getElementById('signupForm');
@@ -80,19 +76,20 @@
         }
     }
     
+    // Menggunakan Form Data untuk mengatasi masalah CORS/Fetch (Sama seperti index.html)
     async function sendApiRequest(action, data = {}) {
         const payload = { action, ...data };
         
         const cacheBuster = `?t=${new Date().getTime()}`;
         const targetUrl = GAS_API_URL + cacheBuster;
 
-        // FETCH LANGSUNG TANPA PROXY (Setelah Apps Script dikoreksi)
+        const bodyData = new URLSearchParams(payload).toString();
+
         try {
-            const response = await fetch(targetUrl, {
+            const response = await fetch(targetUrl, { 
                 method: 'POST',
-                // Header yang dibutuhkan oleh Apps Script
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
-                body: JSON.stringify(payload)
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, 
+                body: bodyData
             });
 
             if (!response.ok) {
@@ -109,17 +106,19 @@
                 }
                 return responseData;
             } catch (e) {
-                 throw new Error('Respons Apps Script tidak valid. Cek izin dan URL.');
+                 console.error("Gagal parse JSON. Respons dari Apps Script:", responseText);
+                 throw new Error('Respons Apps Script tidak valid. Cek izin, URL, dan otorisasi Apps Script.');
             }
-
+            
         } catch (error) {
             console.error("API Request Failed:", error);
-            throw new Error(error.message || 'Koneksi Apps Script Gagal. Cek Izin dan URL.');
+            throw new Error(error.message || 'Koneksi Apps Script Gagal. Cek Jaringan/URL.');
         }
     }
 
     // --- LOGIKA UTAMA ---
 
+    // Fungsi untuk memuat daftar toko (Sama seperti index.html)
     async function loadTokoList() {
         displayMessage('⏳ Memuat daftar toko...', 'loading');
         try {
@@ -133,9 +132,9 @@
                     option.textContent = toko.nama;
                     TOKO_SELECT.appendChild(option);
                 });
-                displayMessage('✅ Daftar toko siap. Silakan kirim permintaan akses.', 'success');
+                displayMessage('✅ Daftar toko siap.', 'success');
             } else {
-                displayMessage('⚠️ Tidak ada toko terdaftar. Hubungi Admin.', 'error');
+                displayMessage('⚠️ Tidak ada toko terdaftar di Sheet "Toko".', 'error');
             }
         } catch (err) {
             TOKO_SELECT.innerHTML = '<option value="" disabled selected>Gagal memuat toko</option>';
@@ -143,32 +142,36 @@
         }
     }
 
-    // Handler Submit Form Signup
+    // Handler Submit Form Pendaftaran
     SIGNUP_FORM.addEventListener('submit', async (e) => {
         e.preventDefault();
         const nama = document.getElementById('nama').value.trim();
         const toko = TOKO_SELECT.value;
 
         if (!nama || !toko) {
-            displayMessage('❌ Harap isi Toko dan Nama lengkap.', 'error');
+            displayMessage('❌ Harap isi Toko dan Nama.', 'error');
             return;
         }
 
-        displayMessage('⏳ Mengirim permintaan...', 'loading');
+        displayMessage('⏳ Mengirim permintaan pendaftaran...', 'loading');
         
         try {
+            // Mengirim aksi saveSignup ke Apps Script
             const data = await sendApiRequest('saveSignup', { nama, toko });
             
-            displayMessage('✅ ' + data.message, 'success');
+            displayMessage('✅ Pendaftaran berhasil! ' + data.message + '. Mengarahkan ke halaman masuk...', 'success');
             
-            SIGNUP_FORM.reset();
+            // Redirect ke halaman login setelah berhasil
+            setTimeout(() => {
+                window.location.href = './index.html'; 
+            }, 3000);
             
         } catch (err) {
             displayMessage('❌ Pendaftaran Gagal: ' + err.message, 'error');
         }
     });
 
-    // Muat daftar toko saat halaman dimuat
+    // Panggil loadTokoList saat halaman dimuat
     document.addEventListener('DOMContentLoaded', loadTokoList);
 </script>
 </body>
