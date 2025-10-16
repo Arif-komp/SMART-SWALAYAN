@@ -69,9 +69,9 @@
         </div>
     </div>
 
-    <script>
+<script>
         // --- PENTING: GANTI DENGAN URL APPS SCRIPT ANDA ---
-        const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbzD2sVr6PNXm18m2aYuK0nAynGZta_Ew3cd8UJwKDDbyRYfR9C1-ciEU6aTDv4oT_LuuA/exec';
+        const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwFhXRPAFqMgkweuIBuM1jZFq6Vj_AJ_kk4XIsdJk0-iEPF6oST5wmbELUrS0bMhqlKiw/exec';
         // --- AKHIR PENTING ---
 
         const SIGNUP_FORM = document.getElementById('signupForm');
@@ -98,7 +98,9 @@
         async function sendApiRequest(action, data = {}, method = 'POST') {
             const payload = { action, ...data };
             const cacheBuster = `?t=${new Date().getTime()}`; 
-            const targetUrl = GAS_API_URL + cacheBuster; 
+            
+            // PERBAIKAN: Menggunakan 'let' agar bisa dimodifikasi di blok GET
+            let targetUrl = GAS_API_URL + cacheBuster; 
             
             const options = {
                 method: method,
@@ -135,6 +137,7 @@
         async function loadTokoList() {
             TOKO_SELECT.innerHTML = '<option value="">-- Memuat Toko... --</option>';
             try {
+                // Menggunakan GET untuk mengambil daftar toko
                 const response = await sendApiRequest('getTokoList', {}, 'GET'); 
                 const tokoList = response.tokoList || [];
                 
@@ -173,6 +176,7 @@
 
             try {
                 const data = { nama, toko };
+                // Menggunakan POST untuk menyimpan data
                 const response = await sendApiRequest('saveSignup', data, 'POST');
                 
                 displayMessage(`✅ ${response.message}`, 'success');
