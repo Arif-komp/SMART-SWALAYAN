@@ -6,116 +6,114 @@
     <title>SMART SWALAYAN - PANEL ADMIN</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
     <style>
         :root { --primary-color: #00796b; --secondary-color: #ff9800; --danger-color: #f44336; --text-color: #333; --bg-color: #eceff1; --card-bg: #ffffff; --border-radius: 12px; --shadow-heavy: 0 10px 30px rgba(0, 0, 0, 0.15); }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-color); padding: 20px; }
-        .container { background-color: var(--card-bg); padding: 30px; border-radius: var(--border-radius); box-shadow: var(--shadow-heavy); width: 100%; max-width: 900px; margin: 50px auto; }
-        h2 { font-size: 1.8em; margin-bottom: 25px; color: var(--primary-color); text-align: center; }
+        body { background-color: var(--bg-color); display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 20px; color: var(--text-color); }
+        .container { background-color: var(--card-bg); padding: 30px; border-radius: var(--border-radius); box-shadow: var(--shadow-heavy); width: 100%; max-width: 800px; margin-top: 20px; transition: all 0.3s ease; }
+        .header-logo { display: block; max-width: 100%; max-height: 70px; margin: 0 auto 20px auto; border-radius: 8px; border: 2px solid var(--primary-color); }
+        h1 { text-align: center; color: var(--primary-color); margin-bottom: 25px; font-size: 1.6em; }
 
-        .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .admin-header button { padding: 10px 15px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; background-color: var(--danger-color); color: white; transition: background-color 0.2s; }
-        .admin-header button:hover { background-color: #d32f2f; }
+        .user-info { background-color: #e0f2f1; padding: 10px 15px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9em; color: var(--primary-color); display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
+        .user-info button { background: none; border: none; color: var(--danger-color); font-size: 1.1em; padding: 5px; cursor: pointer; }
+
+        /* Navigasi Admin & Simpan */
+        .admin-nav { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 20px; }
+        .admin-nav button, #saveChangesButton { 
+            padding: 10px 15px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s;
+        }
+        #goToMainButton { background-color: #03a9f4; color: white; } /* Biru muda */
+        #goToMainButton:hover { background-color: #0288d1; }
         
-        .filter-group { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; padding: 15px; border: 1px solid #eee; border-radius: var(--border-radius); background-color: #f7fcfc; }
-        .filter-group label { font-weight: 600; color: var(--primary-color); }
-        .filter-group select { padding: 10px 15px; border: 1px solid #ccc; border-radius: 8px; flex-grow: 1; max-width: 300px; }
+        #saveChangesButton {
+            width: 100%; padding: 15px 20px; background-color: var(--secondary-color); color: white; margin-top: 20px;
+        }
+        #saveChangesButton:disabled { background-color: #ccc; cursor: not-allowed; }
 
-        #userTable { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        #userTable th, #userTable td { padding: 12px 15px; border: 1px solid #ddd; text-align: left; }
-        #userTable th { background-color: var(--primary-color); color: white; font-weight: 600; }
-        #userTable tr:nth-child(even) { background-color: #f9f9f9; }
+        /* Tabel */
+        .table-responsive { overflow-x: auto; }
+        .user-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.9em; }
+        .user-table th, .user-table td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        .user-table th { background-color: var(--primary-color); color: white; position: sticky; top: 0; }
+        .user-table tr:hover { background-color: #f5f5f5; }
         
-        .status-select { padding: 8px; border-radius: 5px; font-weight: 600; border: 1px solid #ccc; transition: border-color 0.2s; }
-        .status-select.PENDING { background-color: #fffde7; color: #fbc02d; border-color: #fbc02d; }
-        .status-select.AKTIF { background-color: #e8f5e9; color: #2e7d32; border-color: #2e7d32; }
-        .status-select.DITOLAK { background-color: #fce4e4; color: #c62828; border-color: #c62828; }
-        .status-select.SUB_ADMIN { background-color: #e3f2fd; color: #1565c0; border-color: #1565c0; }
-        .status-select.MASTER { background-color: #f3e5f5; color: #673ab7; border-color: #673ab7; }
+        .status-select { padding: 8px; border-radius: 4px; border: 1px solid #ccc; font-size: 1em; width: 100%; max-width: 120px; }
 
-        #saveButton { width: 100%; max-width: 300px; padding: 15px; margin: 25px auto 0 auto; display: block; border: none; border-radius: 10px; font-size: 1.1em; font-weight: 700; background-color: var(--secondary-color); color: white; box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4); cursor: pointer; transition: background-color 0.2s; }
-        #saveButton:hover { background-color: #fb8c00; }
-        #saveButton:disabled { background-color: #ccc; cursor: not-allowed; box-shadow: none; }
+        /* Status Colors */
+        .status-select[value="MASTER"] { background-color: #c62828; color: white; font-weight: 700; }
+        .status-select[value="SUB_ADMIN"] { background-color: #e65100; color: white; }
+        .status-select[value="AKTIF"] { background-color: #388e3c; color: white; }
+        .status-select[value="PENDING"] { background-color: #fbc02d; color: black; }
+        .status-select[value="DITOLAK"] { background-color: #616161; color: white; }
 
-        #message { text-align: center; margin-top: 20px; padding: 12px; border-radius: 8px; font-weight: 600; opacity: 0; transition: opacity 0.5s, transform 0.5s; transform: translateY(10px); }
-        #message.error { background-color: #fce4e4; color: #c62828; }
-        #message.loading { background-color: #fffde7; color: #fbc02d; }
-        #message.show { opacity: 1; transform: translateY(0); }
-        .footer-copyright { margin-top: 20px; padding-top: 10px; border-top: 1px solid #ddd; text-align: center; font-size: 0.75em; color: #777; }
+        /* Messages */
+        .message { text-align: center; margin-top: 20px; padding: 12px; border-radius: 8px; font-weight: 600; opacity: 0; transition: opacity 0.5s, transform 0.5s; transform: translateY(10px); }
+        .message.success { background-color: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+        .message.error { background-color: #fce4e4; color: #c62828; border-color: #ef9a9a; border: 1px solid; }
+        .message.loading { background-color: #fffde7; color: #fbc02d; border-color: #fff9c4; border: 1px solid; }
+        .message.show { opacity: 1; transform: translateY(0); }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="admin-header">
-            <h2><i class="fas fa-user-shield"></i> Panel Administrasi Pengguna</h2>
-            <button id="logoutButton"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        <img src="smart.jpg" alt="Logo Smart Swalayan" class="header-logo">
+        <h1><i class="fas fa-user-shield"></i> PANEL ADMINISTRASI PENGGUNA</h1>
+
+        <div class="user-info">
+            <span id="userInfoText"><i class="fas fa-user-circle"></i> Memuat Sesi...</span>
+            <button id="logoutButton" title="Keluar"><i class="fas fa-sign-out-alt"></i></button>
         </div>
         
-        <p id="loadingMessage" class="message show loading">⏳ Memuat konfigurasi...</p>
-
-        <div id="mainContent" style="display: none;">
-            <div class="filter-group">
-                <label for="tokoFilter"><i class="fas fa-filter"></i> Filter Toko:</label>
-                <select id="tokoFilter">
-                    </select>
-            </div>
-
-            <div id="tableContainer">
-                <table id="userTable">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Nama Pengguna</th>
-                            <th>Toko</th>
-                            <th>Tanggal Daftar</th>
-                            <th>Status Akses</th>
-                        </tr>
-                    </thead>
-                    <tbody id="userTableBody">
-                        </tbody>
-                </table>
-                
-                <button id="saveButton" disabled><i class="fas fa-save"></i> SIMPAN PERUBAHAN</button>
-            </div>
+        <div class="admin-nav">
+             <button id="goToMainButton"><i class="fas fa-home"></i> Ke Halaman Transaksi</button>
         </div>
 
+        <div class="table-responsive">
+            <table class="user-table">
+                <thead>
+                    <tr>
+                        <th>Nama</th>
+                        <th>Toko</th>
+                        <th>Status Akses</th>
+                    </tr>
+                </thead>
+                <tbody id="userTableBody">
+                    <tr><td colspan="3" style="text-align: center;">Memuat data pengguna...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <button id="saveChangesButton" disabled><i class="fas fa-save"></i> SIMPAN PERUBAHAN</button>
         <p id="message" class="message"></p>
     </div>
-    
-    <div id="app-footer-copyright" class="footer-copyright"></div>
 
     <script>
         // --- PENTING: GANTI DENGAN URL APPS SCRIPT ANDA ---
-        const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbxIVyPg4QNV3REolvFpYdbPmwjWiWEkbK6DrEMrUQRcMw_zyF_ZUcpFrXH2k3ZJ_d8ZeA/exec';
+        const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwFhXRPAFqMgkweuIBuM1jZFq6Vj_AJ_kk4XIsdJk0-iEPF6oST5wmbELUrS0bMhqlKiw/exec';
         // --- AKHIR PENTING ---
 
-        const USER_TABLE_BODY = document.getElementById('userTableBody');
-        const SAVE_BUTTON = document.getElementById('saveButton');
+        const USER_INFO_TEXT = document.getElementById('userInfoText');
         const MESSAGE_ELEMENT = document.getElementById('message');
-        const LOADING_MESSAGE = document.getElementById('loadingMessage');
-        const MAIN_CONTENT = document.getElementById('mainContent');
-        const TOKO_FILTER = document.getElementById('tokoFilter');
+        const USER_TABLE_BODY = document.getElementById('userTableBody');
+        const SAVE_BUTTON = document.getElementById('saveChangesButton');
+        const GO_TO_MAIN_BUTTON = document.getElementById('goToMainButton');
         
-        let allUsers = []; 
-        let currentUsersDisplayed = []; 
-        let changesMade = false;
-        let adminSession = null;
-        
+        let userSession = null;
+        let originalUsers = []; 
+        let updatedStatuses = {}; // Objek untuk menyimpan perubahan status
+
+        // --- UTILITY FUNCTIONS ---
         function displayMessage(text, type = 'success') {
-            LOADING_MESSAGE.style.display = 'none';
             MESSAGE_ELEMENT.textContent = text;
-            MESSAGE_ELEMENT.classList.remove('show', 'error', 'loading');
+            MESSAGE_ELEMENT.classList.remove('show', 'error', 'loading', 'success');
             
             if (type === 'error') {
                 MESSAGE_ELEMENT.classList.add('error');
             } else if (type === 'loading') {
                 MESSAGE_ELEMENT.classList.add('loading');
-                LOADING_MESSAGE.textContent = text;
-                LOADING_MESSAGE.style.display = 'block';
-                return; 
             } else {
-                MESSAGE_ELEMENT.style.backgroundColor = '#e8f5e9';
-                MESSAGE_ELEMENT.style.color = '#2e7d32';
+                MESSAGE_ELEMENT.classList.add('success');
             }
 
             setTimeout(() => {
@@ -128,7 +126,7 @@
                 }, 5000);
             }
         }
-
+        
         async function sendApiRequest(action, data = {}) {
             const payload = { action, ...data };
             const cacheBuster = `?t=${new Date().getTime()}`; 
@@ -141,7 +139,7 @@
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, 
                     body: bodyData
                 });
-
+                
                 const responseText = await response.text();
                 
                 try {
@@ -163,202 +161,172 @@
                 throw new Error(error.message || 'Koneksi Apps Script Gagal.');
             }
         }
-        
-        // --- ADMIN LOGIC ---
 
-        function renderTokoFilter(tokoList) {
-            TOKO_FILTER.innerHTML = '';
-            
-            if (adminSession.status === 'MASTER') {
-                const allOption = document.createElement('option');
-                allOption.value = 'ALL';
-                allOption.textContent = '-- Semua Toko --';
-                TOKO_FILTER.appendChild(allOption);
-            }
-            
-            tokoList.forEach(toko => {
-                const option = document.createElement('option');
-                option.value = toko;
-                option.textContent = toko;
-                TOKO_FILTER.appendChild(option);
-            });
-
-            if (adminSession.status === 'MASTER') {
-                TOKO_FILTER.value = 'ALL';
-            } else {
-                TOKO_FILTER.value = adminSession.toko;
-                TOKO_FILTER.disabled = true; 
-            }
-            
-            TOKO_FILTER.addEventListener('change', filterUsers);
-        }
-
-        function filterUsers() {
-            const selectedToko = TOKO_FILTER.value;
-            
-            if (selectedToko === 'ALL') {
-                currentUsersDisplayed = allUsers;
-            } else {
-                currentUsersDisplayed = allUsers.filter(user => user.toko === selectedToko);
-            }
-
-            renderUserTable(currentUsersDisplayed);
-        }
-
-        function renderUserTable(users) {
-            USER_TABLE_BODY.innerHTML = '';
-            changesMade = false;
-            SAVE_BUTTON.disabled = true;
-
-            if (users.length === 0) {
-                USER_TABLE_BODY.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #aaa;">Tidak ada pengguna ditemukan untuk filter ini.</td></tr>';
-                return;
-            }
-
-            users.forEach((user, index) => {
-                const row = USER_TABLE_BODY.insertRow();
-                row.dataset.originalIndex = allUsers.findIndex(u => u.nama === user.nama && u.toko === user.toko);
-                
-                row.insertCell().textContent = index + 1;
-                row.insertCell().textContent = user.nama;
-                row.insertCell().textContent = user.toko;
-                row.insertCell().textContent = user.tanggal;
-                
-                const statusCell = row.insertCell();
-                const select = document.createElement('select');
-                select.className = `status-select ${user.status.toUpperCase()}`;
-                select.dataset.originalStatus = user.status;
-                
-                const statuses = ['PENDING', 'AKTIF', 'SUB_ADMIN', 'DITOLAK'];
-                
-                if (adminSession.status === 'MASTER' || user.status === 'MASTER') {
-                    statuses.push('MASTER');
-                }
-                
-                // Nonaktifkan dropdown jika user adalah MASTER dan admin yang mengedit bukan MASTER
-                if (user.status === 'MASTER' && adminSession.status !== 'MASTER') {
-                    select.disabled = true; 
-                }
-                
-                statuses.forEach(status => {
-                    const option = document.createElement('option');
-                    option.value = status;
-                    option.textContent = status;
-                    if (status === user.status.toUpperCase()) {
-                        option.selected = true;
-                    }
-                    select.appendChild(option);
-                });
-                
-                select.addEventListener('change', handleStatusChange);
-                statusCell.appendChild(select);
-            });
-            MAIN_CONTENT.style.display = 'block';
-        }
-
-        function handleStatusChange(event) {
-            const select = event.target;
-            const newStatus = select.value;
-
-            select.className = `status-select ${newStatus}`;
-
-            const row = select.closest('tr');
-            const originalIndex = row.dataset.originalIndex;
-            
-            allUsers[originalIndex].newStatus = newStatus;
-
-            const allSelects = document.querySelectorAll('.status-select');
-            changesMade = Array.from(allSelects).some(s => s.value !== s.dataset.originalStatus);
-            
-            SAVE_BUTTON.disabled = !changesMade;
-        }
-
-        async function fetchUsers() {
-            displayMessage('⏳ Memuat daftar pengguna...', 'loading');
-            try {
-                const response = await sendApiRequest('getAdminUsers', { 
-                    toko: adminSession.toko, 
-                    isAdminMaster: adminSession.status === 'MASTER' 
-                });
-                
-                allUsers = response.users;
-                renderTokoFilter(response.tokoList);
-                filterUsers(); 
-                
-            } catch (error) {
-                MAIN_CONTENT.style.display = 'none';
-                displayMessage(`❌ Gagal Memuat Data: ${error.message}`, 'error');
-            }
-        }
-
-        async function saveChanges() {
-            if (!changesMade) return;
-
-            displayMessage('⏳ Menyimpan perubahan status...', 'loading');
-            SAVE_BUTTON.disabled = true;
-
-            const updates = allUsers
-                .filter(user => user.newStatus && user.newStatus.toUpperCase() !== user.status.toUpperCase())
-                .map(user => ({
-                    nama: user.nama,
-                    toko: user.toko,
-                    newStatus: user.newStatus.toUpperCase()
-                }));
-
-            if (updates.length === 0) {
-                displayMessage('✅ Tidak ada perubahan status untuk disimpan.', 'success');
-                SAVE_BUTTON.disabled = false;
-                return;
-            }
-
-            try {
-                const response = await sendApiRequest('updateUserStatus', { 
-                    updates: JSON.stringify(updates),
-                    tokoAdmin: adminSession.toko, 
-                    isAdminMaster: adminSession.status === 'MASTER' 
-                });
-                
-                displayMessage(`✅ ${response.message}`, 'success');
-                await fetchUsers();
-            } catch (error) {
-                displayMessage(`❌ Gagal Menyimpan: ${error.message}`, 'error');
-                SAVE_BUTTON.disabled = false;
-            }
-        }
+        // --- AUTHENTICATION & SESSION ---
 
         function checkAuthentication() {
             const session = localStorage.getItem('userSession');
             if (!session) {
-                alert('Akses Ditolak. Silakan login kembali.');
+                alert('Sesi berakhir. Silakan login kembali.');
                 window.location.href = './index.html';
                 return false;
             }
             
             const user = JSON.parse(session);
+            
+            // HANYA MASTER/SUB_ADMIN yang boleh di halaman ini
             if (user.status !== 'MASTER' && user.status !== 'SUB_ADMIN') {
-                alert(`Akses Ditolak. Status Anda: ${user.status}. Anda akan diarahkan ke Halaman Utama.`);
+                alert(`Akses Ditolak. Status Anda: ${user.status}. Anda akan diarahkan ke Halaman Input.`);
                 window.location.href = './main.html';
                 return false;
             }
             
-            adminSession = user;
+            userSession = user;
+            USER_INFO_TEXT.innerHTML = `<i class="fas fa-user-circle"></i> ${user.nama} | Toko: ${user.toko} | Akses: ${user.status}`;
             return true;
         }
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            if (checkAuthentication()) {
-                await fetchUsers();
+        // --- DATA HANDLERS ---
+        
+        async function loadUsers() {
+            displayMessage('⏳ Memuat data pengguna...', 'loading');
+            USER_TABLE_BODY.innerHTML = '<tr><td colspan="3" style="text-align: center;">Memuat data pengguna...</td></tr>';
+            SAVE_BUTTON.disabled = true;
+
+            try {
+                const response = await sendApiRequest('getUsers');
+                originalUsers = response.users;
+                renderUserTable(originalUsers);
+                displayMessage('✅ Data pengguna berhasil dimuat.', 'success');
+            } catch (error) {
+                USER_TABLE_BODY.innerHTML = '<tr><td colspan="3" style="text-align: center; color: red;">Gagal memuat data: ' + error.message + '</td></tr>';
+                displayMessage('❌ Gagal memuat data pengguna: ' + error.message, 'error');
+            }
+        }
+
+        function renderUserTable(users) {
+            USER_TABLE_BODY.innerHTML = '';
+            users.forEach((user, index) => {
+                // Kunci unik untuk setiap baris
+                const userKey = `${user.nama}|${user.toko}`;
+                
+                const row = USER_TABLE_BODY.insertRow();
+                row.innerHTML = `
+                    <td>${user.nama}</td>
+                    <td>${user.toko}</td>
+                    <td>
+                        <select class="status-select" data-index="${index}" data-key="${userKey}" data-original-status="${user.status}" value="${user.status}">
+                            <option value="MASTER" ${userSession.status !== 'MASTER' ? 'hidden' : ''}>MASTER</option>
+                            <option value="SUB_ADMIN" ${userSession.status === 'SUB_ADMIN' && user.toko !== userSession.toko ? 'hidden' : ''}>SUB_ADMIN</option>
+                            <option value="AKTIF">AKTIF</option>
+                            <option value="PENDING">PENDING</option>
+                            <option value="DITOLAK">DITOLAK</option>
+                        </select>
+                    </td>
+                `;
+                
+                // Set nilai awal dan tambahkan listener
+                const selectElement = row.querySelector('.status-select');
+                selectElement.value = user.status;
+                
+                // Tambahkan kelas warna CSS berdasarkan nilai
+                selectElement.classList.add(`status-select`);
+
+                // Filter opsi yang tidak dapat dipilih oleh SUB_ADMIN (kecuali toko sendiri)
+                
+                selectElement.addEventListener('change', handleStatusChange);
+            });
+            // Update tampilan tombol simpan setelah render
+            updateSaveButtonState(); 
+        }
+
+        function handleStatusChange(e) {
+            const select = e.target;
+            const userKey = select.dataset.key;
+            const newStatus = select.value;
+            const originalStatus = select.dataset.originalStatus;
+
+            // Update objek perubahan
+            if (newStatus !== originalStatus) {
+                updatedStatuses[userKey] = {
+                    nama: userKey.split('|')[0],
+                    toko: userKey.split('|')[1],
+                    newStatus: newStatus
+                };
+            } else {
+                delete updatedStatuses[userKey];
             }
             
-            SAVE_BUTTON.addEventListener('click', saveChanges);
+            // Perbarui warna status
+            select.className = 'status-select'; // Reset classes
+            select.classList.add('status-select');
+            select.setAttribute('value', newStatus); // Set value attribute untuk styling CSS
+
+            updateSaveButtonState();
+        }
+
+        function updateSaveButtonState() {
+            const hasChanges = Object.keys(updatedStatuses).length > 0;
+            SAVE_BUTTON.disabled = !hasChanges;
+            SAVE_BUTTON.textContent = hasChanges ? 
+                `SIMPAN PERUBAHAN (${Object.keys(updatedStatuses).length})` : 
+                'TIDAK ADA PERUBAHAN';
+        }
+
+        async function saveChanges() {
+            if (SAVE_BUTTON.disabled) return;
+
+            const changesArray = Object.values(updatedStatuses);
+
+            if (changesArray.length === 0) {
+                displayMessage('Tidak ada perubahan untuk disimpan.', 'error');
+                return;
+            }
+
+            displayMessage('⏳ Mengirim perubahan status...', 'loading');
+            SAVE_BUTTON.disabled = true;
+
+            try {
+                const data = { 
+                    updates: JSON.stringify(changesArray), 
+                    admin: userSession.nama,
+                    adminStatus: userSession.status,
+                    adminToko: userSession.toko
+                };
+                
+                const response = await sendApiRequest('updateUserStatus', data);
+                
+                displayMessage(`✅ ${response.message}`, 'success');
+                
+                // Reset dan muat ulang data untuk mendapatkan status terbaru
+                updatedStatuses = {};
+                await loadUsers(); 
+
+            } catch (err) {
+                displayMessage('❌ Gagal menyimpan perubahan: ' + err.message, 'error');
+                SAVE_BUTTON.disabled = false;
+            }
+        }
+
+
+        // --- MAIN INITIALIZATION ---
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!checkAuthentication()) return;
             
+            loadUsers();
+
+            // Event Listeners
             document.getElementById('logoutButton').addEventListener('click', () => {
                 localStorage.removeItem('userSession');
                 window.location.href = './index.html';
             });
 
-            const currentYear = new Date().getFullYear();
-            document.getElementById('app-footer-copyright').textContent = `© ${currentYear} Smart Swalayan. Admin Panel.`;
+            GO_TO_MAIN_BUTTON.addEventListener('click', () => {
+                window.location.href = './main.html';
+            });
+            
+            SAVE_BUTTON.addEventListener('click', saveChanges);
         });
     </script>
 </body>
