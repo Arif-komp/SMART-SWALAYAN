@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* [Gunakan CSS yang sama persis dari index.html di sini] */
+        /* CSS Disingkat */
         :root { --primary-color: #00796b; --secondary-color: #ff9800; --danger-color: #f44336; --text-color: #333; --bg-color: #eceff1; --card-bg: #ffffff; --border-radius: 12px; --shadow-heavy: 0 10px 30px rgba(0, 0, 0, 0.15); }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
         body { background-color: var(--bg-color); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; color: var(--text-color); }
@@ -58,17 +58,14 @@
     </div>
 
     <script>
-        // --- PENTING: GANTI DENGAN URL APPS SCRIPT ANDA (SAMA DENGAN INDEX.HTML) ---
-        const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbxaMNvF2TMiGUix4c74RNTctn6qCpvaRPYAm_jmbHT6LIWXOd2LLDLTgza085MPZj5GmQ/exec';
+        // --- PENTING: GANTI DENGAN URL APPS SCRIPT ANDA ---
+        const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbya44RVdvQpIVrMWXMW4AnQMK5ld9qKiJZZ9PQFGloprF9joOqJpFWDJtZl6E3THuOKzg/exec';
         // --- AKHIR PENTING ---
 
         const SIGNUP_FORM = document.getElementById('signupForm');
         const TOKO_SELECT = document.getElementById('tokoSelect');
         const MESSAGE_ELEMENT = document.getElementById('message');
         
-        /**
-         * Menampilkan pesan status di UI.
-         */
         function displayMessage(text, type = 'success') {
             MESSAGE_ELEMENT.textContent = text;
             MESSAGE_ELEMENT.classList.remove('show', 'error', 'loading');
@@ -92,14 +89,21 @@
 
         /**
          * Mengirim permintaan ke Apps Script dan mengembalikan data JSON.
+         * Telah dikoreksi dengan Cache Buster untuk mengatasi masalah CORS/Fetch.
          */
         async function sendApiRequest(action, data = {}) {
             const payload = { action, ...data };
+            
+            // KOREKSI UTAMA: Tambahkan Cache Buster untuk mengatasi CORS
+            const cacheBuster = `?t=${new Date().getTime()}`; 
+            const targetUrl = GAS_API_URL + cacheBuster; 
+            
             const bodyData = new URLSearchParams(payload).toString();
 
             try {
-                const response = await fetch(GAS_API_URL, { 
+                const response = await fetch(targetUrl, { // Gunakan targetUrl yang sudah di-buster
                     method: 'POST',
+                    // mode: 'cors' (default) agar bisa membaca JSON
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, 
                     body: bodyData
                 });
@@ -131,7 +135,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
-            // 1. Pemuatan Daftar Toko (Sama seperti index.html)
+            // 1. Pemuatan Daftar Toko
             try {
                 const data = await sendApiRequest('getTokoList');
                 
@@ -148,7 +152,7 @@
                 displayMessage('❌ ' + err.message, 'error');
             }
             
-            // 2. Handler Pendaftaran (Berbeda dari index.html)
+            // 2. Handler Pendaftaran
             SIGNUP_FORM.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const nama = document.getElementById('nama').value.trim();
@@ -162,12 +166,10 @@
                 displayMessage('⏳ Mengirim pendaftaran...', 'loading');
                 
                 try {
-                    // ACTION DI SINI ADALAH 'saveSignup'
                     const data = await sendApiRequest('saveSignup', { nama, toko });
                     
                     displayMessage(`✅ Pendaftaran berhasil! ${data.message} Mengarahkan ke Login...`, 'success');
                     
-                    // Otomatis pindah ke halaman login
                     setTimeout(() => {
                         window.location.href = './index.html'; 
                     }, 2000);
