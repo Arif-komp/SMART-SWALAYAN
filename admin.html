@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMART SWALAYAN - PANEL ADMIN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* CSS Dasar (diambil dari style sebelumnya) */
+        :root { --primary-color: #00796b; --secondary-color: #ff9800; --danger-color: #f44336; --text-color: #333; --bg-color: #eceff1; --card-bg: #ffffff; --border-radius: 12px; --shadow-heavy: 0 10px 30px rgba(0, 0, 0, 0.15); }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-color); padding: 20px; }
+        .container { background-color: var(--card-bg); padding: 30px; border-radius: var(--border-radius); box-shadow: var(--shadow-heavy); width: 100%; max-width: 900px; margin: 50px auto; }
+        h2 { font-size: 1.8em; margin-bottom: 25px; color: var(--primary-color); text-align: center; }
+
+        /* Style Khusus Admin */
+        .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .admin-header button { padding: 10px 15px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; background-color: var(--danger-color); color: white; transition: background-color 0.2s; }
+        .admin-header button:hover { background-color: #d32f2f; }
+        
+        /* Tabel Daftar Pengguna */
+        #userTable { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        #userTable th, #userTable td { padding: 12px 15px; border: 1px solid #ddd; text-align: left; }
+        #userTable th { background-color: var(--primary-color); color: white; font-weight: 600; }
+        #userTable tr:nth-child(even) { background-color: #f9f9f9; }
+        
+        /* Style Status Selector */
+        .status-select { padding: 8px; border-radius: 5px; font-weight: 600; border: 1px solid #ccc; transition: border-color 0.2s; }
+        .status-select.PENDING { background-color: #fffde7; color: #fbc02d; border-color: #fbc02d; }
+        .status-select.AKTIF { background-color: #e8f5e9; color: #2e7d32; border-color: #2e7d32; }
+        .status-select.DITOLAK { background-color: #fce4e4; color: #c62828; border-color: #c62828; }
+
+        /* Tombol Simpan */
+        #saveButton {
+            width: 100%; max-width: 300px; padding: 15px; margin: 25px auto 0 auto; 
+            display: block; border: none; border-radius: 10px; font-size: 1.1em; 
+            font-weight: 700; background-color: var(--secondary-color); color: white; 
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4); cursor: pointer; transition: background-color 0.2s;
+        }
+        #saveButton:hover { background-color: #fb8c00; }
+        #saveButton:disabled { background-color: #ccc; cursor: not-allowed; box-shadow: none; }
+
+        /* Pesan */
+        #message { text-align: center; margin-top: 20px; padding: 12px; border-radius: 8px; font-weight: 600; opacity: 0; transition: opacity 0.5s, transform 0.5s; transform: translateY(10px); background-color: #e8f5e9; color: #2e7d32; }
+        #message.error { background-color: #fce4e4; color: #c62828; }
+        #message.loading { background-color: #fffde7; color: #fbc02d; }
+        #message.show { opacity: 1; transform: translateY(0); }
+        .footer-copyright { margin-top: 20px; padding-top: 10px; border-top: 1px solid #ddd; text-align: center; font-size: 0.75em; color: #777; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="admin-header">
+            <h2><i class="fas fa-user-shield"></i> Panel Administrasi Pengguna</h2>
+            <button id="logoutButton"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+        
+        <p id="loadingMessage" class="message show loading">⏳ Memuat daftar pengguna...</p>
+
+        <div id="tableContainer" style="display: none;">
+            <table id="userTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Nama Pengguna</th>
+                        <th>Toko</th>
+                        <th>Tanggal Daftar</th>
+                        <th>Status Akses</th>
+                    </tr>
+                </thead>
+                <tbody id="userTableBody">
+                    </tbody>
+            </table>
+            
+            <button id="saveButton" disabled><i class="fas fa-save"></i> SIMPAN PERUBAHAN</button>
+        </div>
+
+        <p id="message" class="message"></p>
+    </div>
+    
+    <div id="app-footer-copyright" class="footer-copyright"></div>
+
+    <script>
+        // --- PENTING: GANTI DENGAN URL APPS SCRIPT ANDA ---
+        const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwFhXRPAFqMgkweuIBuM1jZFq6Vj_AJ_kk4XIsdJk0-iEPF6oST5wmbELUrS0bMhqlKiw/exec';
+        // --- AKHIR PENTING ---
+
+        const USER_TABLE_BODY = document.getElementById('userTableBody');
+        const SAVE_BUTTON = document.getElementById('saveButton');
+        const MESSAGE_ELEMENT = document.getElementById('message');
+        const LOADING_MESSAGE = document.getElementById('loadingMessage');
+        const TABLE_CONTAINER = document.getElementById('tableContainer');
+        let currentUsers = []; // Menyimpan data pengguna saat ini
+        let changesMade = false;
+
+        function displayMessage(text, type = 'success') {
+            LOADING_MESSAGE.style.display = 'none';
+            MESSAGE_ELEMENT.textContent = text;
+            MESSAGE_ELEMENT.classList.remove('show', 'error', 'loading');
+            
+            if (type === 'error') {
+                MESSAGE_ELEMENT.classList.add('error');
+            } else if (type === 'loading') {
+                MESSAGE_ELEMENT.classList.add('loading');
+                LOADING_MESSAGE.textContent = text;
+                LOADING_MESSAGE.style.display = 'block';
+                return; // Jangan sembunyikan loading
+            }
+
+            setTimeout(() => {
+                MESSAGE_ELEMENT.classList.add('show');
+            }, 10); 
+
+            if (type !== 'loading') {
+                setTimeout(() => {
+                    MESSAGE_ELEMENT.classList.remove('show');
+                }, 5000);
+            }
+        }
+
+        async function sendApiRequest(action, data = {}) {
+            const payload = { action, ...data };
+            const cacheBuster = `?t=${new Date().getTime()}`; 
+            const targetUrl = GAS_API_URL + cacheBuster; 
+            const bodyData = new URLSearchParams(payload).toString();
+
+            try {
+                const response = await fetch(targetUrl, { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, 
+                    body: bodyData
+                });
+
+                const responseText = await response.text();
+                
+                try {
+                    const responseData = JSON.parse(responseText);
+
+                    if (responseData.status === 'error') {
+                        throw new Error(responseData.message); 
+                    }
+
+                    return responseData;
+                    
+                } catch (e) {
+                     console.error("Gagal parse JSON. Respons dari Apps Script:", responseText);
+                     throw new Error('Respons Apps Script tidak valid. Cek konfigurasi Apps Script/izin.');
+                }
+                
+            } catch (error) {
+                console.error("API Request Failed:", error);
+                throw new Error(error.message || 'Koneksi Apps Script Gagal.');
+            }
+        }
+        
+        // --- ADMIN LOGIC ---
+
+        function renderUserTable(users) {
+            USER_TABLE_BODY.innerHTML = '';
+            currentUsers = users;
+            changesMade = false;
+            SAVE_BUTTON.disabled = true;
+
+            if (users.length === 0) {
+                USER_TABLE_BODY.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #aaa;">Tidak ada permintaan akses atau pengguna terdaftar.</td></tr>';
+                return;
+            }
+
+            users.forEach((user, index) => {
+                const row = USER_TABLE_BODY.insertRow();
+                row.insertCell().textContent = index + 1;
+                row.insertCell().textContent = user.nama;
+                row.insertCell().textContent = user.toko;
+                row.insertCell().textContent = user.tanggal;
+                
+                const statusCell = row.insertCell();
+                const select = document.createElement('select');
+                select.className = `status-select ${user.status.toUpperCase()}`;
+                select.dataset.originalStatus = user.status;
+                select.dataset.userIndex = index;
+                
+                const statuses = ['PENDING', 'AKTIF', 'DITOLAK', 'ADMIN'];
+                statuses.forEach(status => {
+                    const option = document.createElement('option');
+                    option.value = status;
+                    option.textContent = status;
+                    if (status === user.status.toUpperCase()) {
+                        option.selected = true;
+                    }
+                    select.appendChild(option);
+                });
+                
+                select.addEventListener('change', handleStatusChange);
+                statusCell.appendChild(select);
+            });
+            TABLE_CONTAINER.style.display = 'block';
+        }
+
+        function handleStatusChange(event) {
+            const select = event.target;
+            const newStatus = select.value;
+            const originalStatus = select.dataset.originalStatus;
+            const userIndex = select.dataset.userIndex;
+
+            // Update class for styling
+            select.className = `status-select ${newStatus}`;
+
+            // Check if any change was made compared to the original data
+            const allSelects = document.querySelectorAll('.status-select');
+            changesMade = Array.from(allSelects).some(s => s.value !== s.dataset.originalStatus);
+            
+            SAVE_BUTTON.disabled = !changesMade;
+
+            // Update the temporary currentUsers array for easy saving
+            currentUsers[userIndex].newStatus = newStatus;
+        }
+
+        async function fetchUsers() {
+            displayMessage('⏳ Memuat daftar pengguna...', 'loading');
+            try {
+                const response = await sendApiRequest('getAdminUsers');
+                LOADING_MESSAGE.style.display = 'none';
+                renderUserTable(response.users);
+            } catch (error) {
+                LOADING_MESSAGE.style.display = 'none';
+                USER_TABLE_BODY.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--danger-color);">${error.message}. Cek apakah Anda login sebagai Admin.</td></tr>`;
+                displayMessage(`❌ Gagal Memuat Data: ${error.message}`, 'error');
+            }
+        }
+
+        async function saveChanges() {
+            if (!changesMade) return;
+
+            displayMessage('⏳ Menyimpan perubahan status...', 'loading');
+            SAVE_BUTTON.disabled = true;
+
+            const updates = currentUsers
+                .filter(user => user.newStatus && user.newStatus.toUpperCase() !== user.status.toUpperCase())
+                .map(user => ({
+                    nama: user.nama,
+                    toko: user.toko,
+                    newStatus: user.newStatus.toUpperCase()
+                }));
+
+            if (updates.length === 0) {
+                displayMessage('✅ Tidak ada perubahan status untuk disimpan.', 'success');
+                SAVE_BUTTON.disabled = false;
+                return;
+            }
+
+            try {
+                const response = await sendApiRequest('updateUserStatus', { updates: JSON.stringify(updates) });
+                displayMessage(`✅ ${response.message}`, 'success');
+                // Muat ulang tabel setelah sukses
+                await fetchUsers();
+            } catch (error) {
+                displayMessage(`❌ Gagal Menyimpan: ${error.message}`, 'error');
+                SAVE_BUTTON.disabled = false; // Aktifkan tombol lagi jika gagal
+            }
+        }
+
+        function checkAdminSession() {
+            const session = localStorage.getItem('userSession');
+            if (!session) {
+                alert('Akses Ditolak. Silakan login sebagai Admin.');
+                window.location.href = './index.html';
+                return false;
+            }
+            const user = JSON.parse(session);
+            if (user.status !== 'ADMIN') {
+                alert(`Akses Ditolak. Akun Anda (${user.nama}) bukan Admin.`);
+                window.location.href = './index.html';
+                return false;
+            }
+            return true;
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (checkAdminSession()) {
+                await fetchUsers();
+            }
+            
+            SAVE_BUTTON.addEventListener('click', saveChanges);
+            
+            document.getElementById('logoutButton').addEventListener('click', () => {
+                localStorage.removeItem('userSession');
+                window.location.href = './index.html';
+            });
+
+            const currentYear = new Date().getFullYear();
+            document.getElementById('app-footer-copyright').textContent = `© ${currentYear} Smart Swalayan. Admin Panel.`;
+        });
+    </script>
+</body>
+</html>
