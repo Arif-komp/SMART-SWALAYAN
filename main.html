@@ -9,7 +9,7 @@
     <script src="https://unpkg.com/@zxing/library@latest"></script>
     
     <style>
-        /* CSS Disingkat (Hanya Tambahan untuk Kapitalisasi Lokasi) */
+        /* CSS yang sudah disesuaikan, termasuk untuk tombol Admin Panel */
         :root { --primary-color: #00796b; --secondary-color: #ff9800; --danger-color: #f44336; --text-color: #333; --bg-color: #eceff1; --card-bg: #ffffff; --border-radius: 12px; --shadow-heavy: 0 10px 30px rgba(0, 0, 0, 0.15); --scan-glow-color: #00ff00; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
         body { background-color: var(--bg-color); display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 20px; color: var(--text-color); }
@@ -20,7 +20,6 @@
         .input-group { margin-bottom: 20px; }
         .input-group label { display: block; margin-bottom: 8px; color: var(--primary-color); font-weight: 700; font-size: 0.95em; }
         
-        /* Kapitalisasi Lokasi di CSS dan JS */
         #lokasi { text-transform: uppercase; }
 
         input[type="text"], input[type="number"], input[type="date"] { width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 1em; color: var(--text-color); transition: all 0.3s; }
@@ -33,10 +32,21 @@
         .scan-btn, .minus-btn { color: white; border-radius: 0 8px 8px 0; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); min-width: 80px; }
         .scan-btn { background-color: var(--primary-color); }
         .minus-btn { background-color: var(--danger-color); padding: 12px 18px; min-width: 50px; }
-        .minus-btn.active { background-color: #388e3c; } /* Warna hijau saat minus diaktifkan */
+        .minus-btn.active { background-color: #388e3c; } 
         
         .save-btn { width: 100%; padding: 15px 20px; background-color: var(--secondary-color); color: white; border-radius: 10px; font-size: 1.15em; font-weight: 700; margin-top: 30px; box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4); }
         
+        /* Navigasi Admin */
+        #adminPanelButton { 
+            background-color: #1565c0; 
+            color: white; 
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-top: 15px;
+            display: none; 
+            width: 100%;
+        }
+
         /* SCANNERS */
         .scanner-placeholder { margin-top: 15px; width: 100%; padding-bottom: 60%; position: relative; background-color: #1a1a1a; border: 3px solid #ccc; border-radius: 10px; display: none; overflow: hidden; }
         .scanner-placeholder.active { display: block; border-color: var(--primary-color); background-color: #000; }
@@ -66,7 +76,7 @@
         <form id="inventoryForm">
 
             <div class="input-group">
-                <label for="lokasi"><i class="fas fa-warehouse"></i> Lokasi</label>
+                <label for="lokasi"><i class="fas fa-warehouse"></i> Lokasi </label>
                 <input type="text" 
                     id="lokasi" 
                     name="lokasi" 
@@ -116,11 +126,13 @@
             <button type="submit" id="saveButton" class="save-btn"><i class="fas fa-upload"></i> SIMPAN TRANSAKSI </button>
             <p id="message" class="message"></p>
         </form>
+        
+        <button id="adminPanelButton" style="display: none;"><i class="fas fa-user-shield"></i> KE ADMIN PANEL</button>
     </div>
 
     <script>
         // --- PENTING: GANTI DENGAN URL APPS SCRIPT ANDA ---
-        const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbxIVyPg4QNV3REolvFpYdbPmwjWiWEkbK6DrEMrUQRcMw_zyF_ZUcpFrXH2k3ZJ_d8ZeA/exec';
+        const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwFhXRPAFqMgkweuIBuM1jZFq6Vj_AJ_kk4XIsdJk0-iEPF6oST5wmbELUrS0bMhqlKiw/exec';
         // --- AKHIR PENTING ---
 
         const INVENTORY_FORM = document.getElementById('inventoryForm');
@@ -130,15 +142,15 @@
         const BARCODE_INPUT = document.getElementById('barcode');
         const SCAN_BUTTON = document.getElementById('scanButton');
         const SCANNER_CONTAINER = document.getElementById('scanner-container');
-        const VIDEO_FEED = document.getElementById('video-feed');
         const USER_INFO_TEXT = document.getElementById('userInfoText');
+        const ADMIN_PANEL_BUTTON = document.getElementById('adminPanelButton');
+        const VIDEO_FEED = document.getElementById('video-feed');
         
         let userSession = null;
         let codeReader = null;
         let videoInputDevices = [];
         
         // --- UTILITY FUNCTIONS ---
-
         function displayMessage(text, type = 'success') {
             MESSAGE_ELEMENT.textContent = text;
             MESSAGE_ELEMENT.classList.remove('show', 'error', 'loading', 'success');
@@ -197,6 +209,7 @@
             }
         }
 
+
         // --- AUTHENTICATION & SESSION ---
 
         function checkAuthentication() {
@@ -208,18 +221,21 @@
             }
             
             const user = JSON.parse(session);
-            // Hanya user AKTIF yang boleh di halaman ini
-            if (user.status !== 'AKTIF') {
-                alert(`Akses Ditolak. Status Anda: ${user.status}. Anda akan diarahkan ke Halaman Admin/Login.`);
+            
+            if (user.status !== 'AKTIF' && user.status !== 'MASTER' && user.status !== 'SUB_ADMIN') {
+                alert(`Akses Ditolak. Status Anda: ${user.status}. Anda akan diarahkan ke Halaman Login.`);
                 localStorage.removeItem('userSession'); 
-                window.location.href = (user.status === 'MASTER' || user.status === 'SUB_ADMIN') ? './admin.html' : './index.html';
+                window.location.href = './index.html';
                 return false;
             }
             
             userSession = user;
             USER_INFO_TEXT.innerHTML = `<i class="fas fa-user-circle"></i> ${user.nama} | Toko: ${user.toko}`;
             
-            // Set tanggal hari ini
+            if (user.status === 'MASTER' || user.status === 'SUB_ADMIN') {
+                ADMIN_PANEL_BUTTON.style.display = 'block';
+            }
+            
             const today = new Date();
             const dateString = today.toISOString().split('T')[0];
             document.getElementById('tanggal').value = dateString;
@@ -228,12 +244,17 @@
         }
         
         // --- SCANNER LOGIC (ZXING-JS) ---
-        
+
         async function startScanner() {
             if (!codeReader) {
                  codeReader = new ZXing.BrowserMultiFormatReader();
-                 // Mendapatkan daftar kamera
-                 videoInputDevices = await codeReader.getVideoInputDevices();
+                 // Pengecekan izin kamera
+                 try {
+                     videoInputDevices = await codeReader.getVideoInputDevices();
+                 } catch (e) {
+                     displayMessage('❌ Gagal akses kamera: ' + e.message, 'error');
+                     return;
+                 }
             }
 
             if (videoInputDevices.length === 0) {
@@ -241,24 +262,21 @@
                 return;
             }
 
-            // Memilih kamera belakang (jika ada) atau kamera pertama
             const rearCamera = videoInputDevices.find(device => device.label.toLowerCase().includes('back')) || videoInputDevices[0];
             
             SCANNER_CONTAINER.classList.add('active');
             SCAN_BUTTON.textContent = 'STOP SCAN';
             SCAN_BUTTON.classList.remove('scan-btn');
-            SCAN_BUTTON.classList.add('minus-btn'); // Ganti warna tombol saat aktif
+            SCAN_BUTTON.classList.add('minus-btn'); 
 
             try {
                 codeReader.decodeFromVideoDevice(rearCamera.deviceId, 'video-feed', (result, err) => {
                     if (result) {
                         BARCODE_INPUT.value = result.text.trim();
                         stopScanner();
-                        // Fokus ke kolom QTY setelah scan
                         QTY_INPUT.focus(); 
                     }
                     if (err && !(err instanceof ZXing.NotFoundException)) {
-                        // Error lain selain 'tidak ditemukan'
                         console.error(err);
                     }
                 });
@@ -279,6 +297,7 @@
             SCAN_BUTTON.classList.add('scan-btn');
         }
 
+
         // --- HANDLERS ---
 
         function handleMinusToggle() {
@@ -290,11 +309,9 @@
             }
 
             if (currentValue.startsWith('-')) {
-                // Hapus tanda minus
                 QTY_INPUT.value = currentValue.substring(1);
                 MINUS_BUTTON.classList.remove('active');
             } else {
-                // Tambahkan tanda minus
                 QTY_INPUT.value = '-' + currentValue;
                 MINUS_BUTTON.classList.add('active');
             }
@@ -304,7 +321,7 @@
         async function handleFormSubmit(e) {
             e.preventDefault();
             
-            stopScanner(); // Pastikan scanner mati sebelum submit
+            stopScanner(); 
 
             const qtyValue = QTY_INPUT.value.trim();
 
@@ -322,7 +339,6 @@
                 return;
             }
             
-            // Validasi QTY sebagai angka
             if (isNaN(Number(data.qty))) {
                 displayMessage('❌ Kuantitas (QTY) harus berupa angka yang valid.', 'error');
                 return;
@@ -335,12 +351,10 @@
                 
                 displayMessage(`✅ ${response.message}`, 'success');
                 
-                // Reset kolom input (kecuali Lokasi)
                 BARCODE_INPUT.value = '';
                 QTY_INPUT.value = '';
                 MINUS_BUTTON.classList.remove('active');
                 
-                // Fokus kembali ke Barcode atau Lokasi
                 document.getElementById('lokasi').focus(); 
                 
             } catch (err) {
@@ -372,7 +386,11 @@
             MINUS_BUTTON.addEventListener('click', handleMinusToggle);
             INVENTORY_FORM.addEventListener('submit', handleFormSubmit);
 
-            // Set fokus awal ke Lokasi
+            ADMIN_PANEL_BUTTON.addEventListener('click', () => {
+                stopScanner(); 
+                window.location.href = './admin.html';
+            });
+
             document.getElementById('lokasi').focus();
         });
     </script>
