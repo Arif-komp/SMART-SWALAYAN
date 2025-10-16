@@ -7,61 +7,37 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* CSS Dasar */
+        /* CSS Disingkat */
         :root { --primary-color: #00796b; --secondary-color: #ff9800; --danger-color: #f44336; --text-color: #333; --bg-color: #eceff1; --card-bg: #ffffff; --border-radius: 12px; --shadow-heavy: 0 10px 30px rgba(0, 0, 0, 0.15); }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-color); padding: 20px; }
         .container { background-color: var(--card-bg); padding: 30px; border-radius: var(--border-radius); box-shadow: var(--shadow-heavy); width: 100%; max-width: 900px; margin: 50px auto; }
         h2 { font-size: 1.8em; margin-bottom: 25px; color: var(--primary-color); text-align: center; }
 
-        /* Style Khusus Admin */
         .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .admin-header button { padding: 10px 15px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; background-color: var(--danger-color); color: white; transition: background-color 0.2s; }
         .admin-header button:hover { background-color: #d32f2f; }
         
-        .filter-group { 
-            display: flex; 
-            align-items: center; 
-            gap: 15px; 
-            margin-bottom: 20px;
-            padding: 15px;
-            border: 1px solid #eee;
-            border-radius: var(--border-radius);
-            background-color: #f7fcfc;
-        }
+        .filter-group { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; padding: 15px; border: 1px solid #eee; border-radius: var(--border-radius); background-color: #f7fcfc; }
         .filter-group label { font-weight: 600; color: var(--primary-color); }
-        .filter-group select { 
-            padding: 10px 15px; 
-            border: 1px solid #ccc; 
-            border-radius: 8px; 
-            flex-grow: 1;
-            max-width: 300px;
-        }
+        .filter-group select { padding: 10px 15px; border: 1px solid #ccc; border-radius: 8px; flex-grow: 1; max-width: 300px; }
 
-        /* Tabel Daftar Pengguna */
         #userTable { width: 100%; border-collapse: collapse; margin-top: 20px; }
         #userTable th, #userTable td { padding: 12px 15px; border: 1px solid #ddd; text-align: left; }
         #userTable th { background-color: var(--primary-color); color: white; font-weight: 600; }
         #userTable tr:nth-child(even) { background-color: #f9f9f9; }
         
-        /* Style Status Selector */
         .status-select { padding: 8px; border-radius: 5px; font-weight: 600; border: 1px solid #ccc; transition: border-color 0.2s; }
         .status-select.PENDING { background-color: #fffde7; color: #fbc02d; border-color: #fbc02d; }
         .status-select.AKTIF { background-color: #e8f5e9; color: #2e7d32; border-color: #2e7d32; }
         .status-select.DITOLAK { background-color: #fce4e4; color: #c62828; border-color: #c62828; }
-        .status-select.ADMIN { background-color: #e3f2fd; color: #1565c0; border-color: #1565c0; }
+        .status-select.SUB_ADMIN { background-color: #e3f2fd; color: #1565c0; border-color: #1565c0; }
+        .status-select.MASTER { background-color: #f3e5f5; color: #673ab7; border-color: #673ab7; }
 
-        /* Tombol Simpan */
-        #saveButton {
-            width: 100%; max-width: 300px; padding: 15px; margin: 25px auto 0 auto; 
-            display: block; border: none; border-radius: 10px; font-size: 1.1em; 
-            font-weight: 700; background-color: var(--secondary-color); color: white; 
-            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4); cursor: pointer; transition: background-color 0.2s;
-        }
+        #saveButton { width: 100%; max-width: 300px; padding: 15px; margin: 25px auto 0 auto; display: block; border: none; border-radius: 10px; font-size: 1.1em; font-weight: 700; background-color: var(--secondary-color); color: white; box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4); cursor: pointer; transition: background-color 0.2s; }
         #saveButton:hover { background-color: #fb8c00; }
         #saveButton:disabled { background-color: #ccc; cursor: not-allowed; box-shadow: none; }
 
-        /* Pesan */
         #message { text-align: center; margin-top: 20px; padding: 12px; border-radius: 8px; font-weight: 600; opacity: 0; transition: opacity 0.5s, transform 0.5s; transform: translateY(10px); background-color: #e8f5e9; color: #2e7d32; }
         #message.error { background-color: #fce4e4; color: #c62828; }
         #message.loading { background-color: #fffde7; color: #fbc02d; }
@@ -111,7 +87,7 @@
 
     <script>
         // --- PENTING: GANTI DENGAN URL APPS SCRIPT ANDA ---
-        const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbzmnPqnVAVVr_NfhRgHisIm_HicnvTpICV14S88neBItmQpCGiJREDLX1_4GWPhLR7kKg/exec';
+        const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwFhXRPAFqMgkweuIBuM1jZFq6Vj_AJ_kk4XIsdJk0-iEPF6oST5wmbELUrS0bMhqlKiw/exec';
         // --- AKHIR PENTING ---
 
         const USER_TABLE_BODY = document.getElementById('userTableBody');
@@ -121,8 +97,8 @@
         const MAIN_CONTENT = document.getElementById('mainContent');
         const TOKO_FILTER = document.getElementById('tokoFilter');
         
-        let allUsers = []; // Menyimpan semua data pengguna (Admin Master) atau data toko sendiri (Admin Toko)
-        let currentUsersDisplayed = []; // Data yang sedang ditampilkan
+        let allUsers = []; 
+        let currentUsersDisplayed = []; 
         let changesMade = false;
         let adminSession = null;
         
@@ -192,7 +168,7 @@
             TOKO_FILTER.innerHTML = '';
             
             // Tambahkan opsi "Semua Toko" hanya untuk Admin Master
-            if (adminSession.status === 'ADMIN') {
+            if (adminSession.status === 'MASTER') {
                 const allOption = document.createElement('option');
                 allOption.value = 'ALL';
                 allOption.textContent = '-- Semua Toko --';
@@ -208,11 +184,11 @@
             });
 
             // Set default selection
-            if (adminSession.status === 'ADMIN') {
+            if (adminSession.status === 'MASTER') {
                 TOKO_FILTER.value = 'ALL';
             } else {
                 TOKO_FILTER.value = adminSession.toko;
-                TOKO_FILTER.disabled = true; // Admin Toko tidak bisa ganti toko
+                TOKO_FILTER.disabled = true; 
             }
             
             TOKO_FILTER.addEventListener('change', filterUsers);
@@ -242,7 +218,6 @@
 
             users.forEach((user, index) => {
                 const row = USER_TABLE_BODY.insertRow();
-                // Simpan original index di data array untuk referensi saat menyimpan
                 row.dataset.originalIndex = allUsers.findIndex(u => u.nama === user.nama && u.toko === user.toko);
                 
                 row.insertCell().textContent = index + 1;
@@ -255,19 +230,16 @@
                 select.className = `status-select ${user.status.toUpperCase()}`;
                 select.dataset.originalStatus = user.status;
                 
-                // Pilihan status yang tersedia
-                const statuses = ['PENDING', 'AKTIF', 'DITOLAK'];
+                // Status yang tersedia (sesuai permintaan user: MASTER, SUB_ADMIN, AKTIF, DITOLAK, PENDING)
+                const statuses = ['PENDING', 'AKTIF', 'SUB_ADMIN', 'DITOLAK'];
                 
-                // Tambahkan ADMIN hanya jika admin master
-                if (adminSession.status === 'ADMIN') {
-                    statuses.push('ADMIN');
-                } else if (user.status === 'ADMIN') {
-                    // Jika admin toko mencoba melihat admin lain, pastikan ADMIN ada di opsi
-                    statuses.push('ADMIN');
+                // Tambahkan MASTER hanya jika admin master atau user itu sendiri MASTER
+                if (adminSession.status === 'MASTER' || user.status === 'MASTER') {
+                    statuses.push('MASTER');
                 }
                 
-                // Nonaktifkan dropdown jika user adalah ADMIN (kecuali yang mengedit adalah admin master)
-                if (user.status === 'ADMIN' && adminSession.status !== 'ADMIN') {
+                // Nonaktifkan dropdown jika user adalah MASTER dan admin yang mengedit bukan MASTER
+                if (user.status === 'MASTER' && adminSession.status !== 'MASTER') {
                     select.disabled = true; 
                 }
                 
@@ -291,18 +263,13 @@
             const select = event.target;
             const newStatus = select.value;
 
-            // Update class for styling
             select.className = `status-select ${newStatus}`;
 
-            // Cari baris di DOM dan dapatkan originalIndex
             const row = select.closest('tr');
             const originalIndex = row.dataset.originalIndex;
             
-            // Simpan perubahan ke array allUsers
             allUsers[originalIndex].newStatus = newStatus;
 
-
-            // Check if any change was made compared to the original data in the currently displayed view
             const allSelects = document.querySelectorAll('.status-select');
             changesMade = Array.from(allSelects).some(s => s.value !== s.dataset.originalStatus);
             
@@ -312,19 +279,14 @@
         async function fetchUsers() {
             displayMessage('⏳ Memuat daftar pengguna...', 'loading');
             try {
-                // Kirim status admin dan toko ke Apps Script untuk otorisasi dan filtering
                 const response = await sendApiRequest('getAdminUsers', { 
                     toko: adminSession.toko, 
-                    isAdminMaster: adminSession.status === 'ADMIN' 
+                    isAdminMaster: adminSession.status === 'MASTER' 
                 });
                 
                 allUsers = response.users;
-                
-                // Render filter toko
                 renderTokoFilter(response.tokoList);
-
-                // Tampilkan data sesuai filter default
-                filterUsers();
+                filterUsers(); // Panggil filterUsers untuk render awal
                 
             } catch (error) {
                 MAIN_CONTENT.style.display = 'none';
@@ -353,15 +315,13 @@
             }
 
             try {
-                // Kirim status admin untuk verifikasi otoritas saat menyimpan
                 const response = await sendApiRequest('updateUserStatus', { 
                     updates: JSON.stringify(updates),
                     tokoAdmin: adminSession.toko, 
-                    isAdminMaster: adminSession.status === 'ADMIN' 
+                    isAdminMaster: adminSession.status === 'MASTER' 
                 });
                 
                 displayMessage(`✅ ${response.message}`, 'success');
-                // Muat ulang tabel setelah sukses
                 await fetchUsers();
             } catch (error) {
                 displayMessage(`❌ Gagal Menyimpan: ${error.message}`, 'error');
@@ -369,28 +329,28 @@
             }
         }
 
-        function checkAdminSession() {
+        function checkAuthentication() {
             const session = localStorage.getItem('userSession');
             if (!session) {
-                alert('Akses Ditolak. Silakan login sebagai Admin.');
+                alert('Akses Ditolak. Silakan login kembali.');
                 window.location.href = './index.html';
                 return false;
             }
+            
             const user = JSON.parse(session);
-            
-            if (user.status !== 'ADMIN' && user.status !== 'AKTIF') {
-                alert(`Akses Ditolak. Akun Anda (${user.nama}) tidak memiliki hak akses Admin.`);
-                window.location.href = './index.html';
+            // Hanya user MASTER dan SUB_ADMIN yang boleh di halaman ini
+            if (user.status !== 'MASTER' && user.status !== 'SUB_ADMIN') {
+                alert(`Akses Ditolak. Status Anda: ${user.status}. Anda akan diarahkan ke Halaman Utama.`);
+                window.location.href = './main.html';
                 return false;
             }
             
-            // Perluasan: Kita anggap AKTIF yang terdaftar di Toko A adalah Admin Toko A (kecuali statusnya 'PENDING' atau 'DITOLAK')
             adminSession = user;
             return true;
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
-            if (checkAdminSession()) {
+            if (checkAuthentication()) {
                 await fetchUsers();
             }
             
