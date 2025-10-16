@@ -16,7 +16,7 @@
         h2 { font-size: 1.8em; margin-bottom: 25px; color: var(--primary-color); text-align: center; }
         .input-group { margin-bottom: 20px; }
         .input-group label { display: block; margin-bottom: 8px; color: var(--primary-color); font-weight: 700; font-size: 0.95em; }
-        #nama { text-transform: uppercase; } /* Pastikan nama selalu uppercase */
+        #nama { text-transform: uppercase; } 
         input[type="text"], select { width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 1em; color: var(--text-color); transition: all 0.3s; }
         input:focus, select:focus { border-color: var(--primary-color); box-shadow: 0 0 0 4px rgba(0, 121, 107, 0.2); background-color: #f7fcfc; outline: none; }
         .login-btn-main { width: 100%; padding: 15px 20px; border: none; border-radius: 10px; font-size: 1.1em; font-weight: 700; transition: transform 0.1s, box-shadow 0.3s; margin-top: 15px; background-color: var(--primary-color); color: white; box-shadow: 0 5px 15px rgba(0, 121, 107, 0.4); }
@@ -34,7 +34,7 @@
 <body>
     <div class="container">
         <img src="smart.jpg" alt="Logo Smart Swalayan" class="header-logo">
-        <h2><i class="fas fa-sign-in-alt"></i> Login Aplikasi Inventaris</h2>
+        <h2><i class="fas fa-sign-in-alt"></i> SIGN IN </h2>
 
         <form id="loginForm">
             <div class="input-group">
@@ -62,12 +62,11 @@
 
     <script>
         // --- PENTING: GANTI DENGAN URL APPS SCRIPT ANDA ---
-        const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbzmnPqnVAVVr_NfhRgHisIm_HicnvTpICV14S88neBItmQpCGiJREDLX1_4GWPhLR7kKg/exec';
+        const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwFhXRPAFqMgkweuIBuM1jZFq6Vj_AJ_kk4XIsdJk0-iEPF6oST5wmbELUrS0bMhqlKiw/exec';
         // --- DAFTAR TOKO HARDCODE (HARUS SINKRON DENGAN SHEET 'TOKO') ---
         const LIST_TOKO_HARDCODE = [
             "SMART SWALAYAN BIMA", 
             "DEPO TENTE", 
-            // Tambahkan toko baru di sini
         ];
         // --- AKHIR PENTING ---
 
@@ -135,8 +134,24 @@
             }
         }
 
+        function checkSession() {
+            const session = localStorage.getItem('userSession');
+            if (session) {
+                const user = JSON.parse(session);
+                // Langsung redirect ke halaman sesuai status tanpa batas waktu sesi
+                if (user.status === 'MASTER' || user.status === 'SUB_ADMIN') {
+                    window.location.href = './admin.html';
+                } else if (user.status === 'AKTIF') {
+                    window.location.href = './main.html';
+                }
+            }
+        }
+
 
         document.addEventListener('DOMContentLoaded', async () => {
+            // Cek sesi tanpa batas waktu
+            checkSession(); 
+            
             // 1. HARDCODE PEMUATAN DAFTAR TOKO (INSTANT)
             TOKO_SELECT.innerHTML = '<option value="" disabled selected>-- Pilih Toko Anda --</option>';
             LIST_TOKO_HARDCODE.forEach(toko => {
@@ -162,14 +177,14 @@
                 try {
                     const data = await sendApiRequest('login', { nama, toko });
                     
-                    // Simpan data user yang sukses login ke sesi lokal
+                    // Simpan data user tanpa batas waktu sesi lokal
                     localStorage.setItem('userSession', JSON.stringify(data.user));
                     
                     displayMessage(`✅ ${data.message} Selamat Datang, ${data.user.nama}!`, 'success');
                     
                     setTimeout(() => {
-                        // Redirect ke halaman utama/input setelah sukses login
-                        window.location.href = './main.html'; 
+                        // Redirect ke halaman yang sesuai
+                        checkSession();
                     }, 1500);
                     
                 } catch (err) {
