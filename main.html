@@ -9,7 +9,7 @@
     <script src="https://unpkg.com/@zxing/library@latest"></script>
     
     <style>
-        /* CSS yang konsisten (disingkat untuk fokus pada JS) */
+        /* CSS Disingkat (Hanya Tambahan untuk Kapitalisasi Lokasi) */
         :root { --primary-color: #00796b; --secondary-color: #ff9800; --danger-color: #f44336; --text-color: #333; --bg-color: #eceff1; --card-bg: #ffffff; --border-radius: 12px; --shadow-heavy: 0 10px 30px rgba(0, 0, 0, 0.15); --sparkle-color: #ffe082; --scan-glow-color: #00ff00; --mouse-x: 50%; --mouse-y: 50%; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
         body { background-color: var(--bg-color); display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 20px; color: var(--text-color); }
@@ -21,6 +21,12 @@
         .input-group label { display: block; margin-bottom: 8px; color: var(--primary-color); font-weight: 700; font-size: 0.95em; }
         input[type="text"], input[type="number"], input[type="date"] { width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 1em; color: var(--text-color); transition: all 0.3s; }
         input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 4px rgba(0, 121, 107, 0.2); background-color: #f7fcfc; outline: none; }
+
+        /* CSS TAMBAHAN: Kapitalisasi Lokasi */
+        #lokasi {
+            text-transform: uppercase;
+        }
+
         .input-with-icon { display: flex; align-items: stretch; }
         .input-with-icon input { flex-grow: 1; border-radius: 8px 0 0 8px; border-right: none; }
         button { cursor: pointer; border: none; font-weight: 600; transition: background-color 0.3s, transform 0.1s, box-shadow 0.3s; white-space: nowrap; padding: 12px 15px; font-size: 1.0em; min-width: 40px; }
@@ -53,7 +59,12 @@
 
             <div class="input-group">
                 <label for="lokasi"><i class="fas fa-warehouse"></i> Lokasi </label>
-                <input type="text" id="lokasi" name="lokasi" placeholder="Input Lokasi (misal: Rak A01)" required>
+                <input type="text" 
+                    id="lokasi" 
+                    name="lokasi" 
+                    placeholder="Input Lokasi" 
+                    required
+                    oninput="this.value = this.value.toUpperCase()">
             </div>
 
             <div class="input-group barcode-group">
@@ -75,7 +86,7 @@
             <div class="input-group">
                 <label for="qty"><i class="fas fa-boxes"></i> Jumlah </label>
                 <div class="input-with-icon"> 
-                    <input type="text" 
+                    <input type="number" 
                         id="qty" 
                         name="qty" 
                         placeholder="Masukkan jumlah (+/-)" 
@@ -214,6 +225,11 @@
             document.getElementById('scanButton').addEventListener('click', () => {
                 if (isScanning) { stopScanner(); } else { startScanner(); }
             });
+            
+            // Tambahan: Enforce uppercase saat user mengetik (jika oninput di HTML terlewat)
+            lokasiInput.addEventListener('input', function() {
+                this.value = this.value.toUpperCase();
+            });
 
             // Set Tanggal Otomatis
             const setTodayDate = () => {
@@ -229,6 +245,7 @@
             // Logika Tombol Minus
             document.getElementById('minusButton').addEventListener('click', () => {
                 const value = qtyInput.value.trim();
+                // Tetap menggunakan logika JS yang sama untuk toggle tanda minus
                 qtyInput.value = value.startsWith('-') ? value.substring(1) : '-' + value;
                 qtyInput.focus();
             });
@@ -238,12 +255,20 @@
                 e.preventDefault();
 
                 if (isScanning) { stopScanner(); }
+                
+                // Pastikan qty adalah angka yang valid (meskipun input type=number)
+                const qtyValue = parseFloat(qtyInput.value);
+                if (isNaN(qtyValue)) {
+                    displayMessage('❌ Jumlah (QTY) harus berupa angka.', 'error');
+                    qtyInput.focus();
+                    return;
+                }
 
                 const data = {
                     action: 'saveInventory', 
                     lokasi: lokasiInput.value,
                     barcode: document.getElementById('barcode').value,
-                    qty: qtyInput.value,
+                    qty: qtyValue.toString(), // Kirim sebagai string agar Apps Script memprosesnya
                     tanggal: tanggalInput.value,
                     user: userSession.nama, // Nama Pengguna
                     toko: userSession.toko  // Nama Toko
