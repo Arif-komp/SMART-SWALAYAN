@@ -7,7 +7,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* CSS Disingkat */
         :root { --primary-color: #00796b; --secondary-color: #ff9800; --danger-color: #f44336; --text-color: #333; --bg-color: #eceff1; --card-bg: #ffffff; --border-radius: 12px; --shadow-heavy: 0 10px 30px rgba(0, 0, 0, 0.15); }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-color); padding: 20px; }
@@ -38,7 +37,7 @@
         #saveButton:hover { background-color: #fb8c00; }
         #saveButton:disabled { background-color: #ccc; cursor: not-allowed; box-shadow: none; }
 
-        #message { text-align: center; margin-top: 20px; padding: 12px; border-radius: 8px; font-weight: 600; opacity: 0; transition: opacity 0.5s, transform 0.5s; transform: translateY(10px); background-color: #e8f5e9; color: #2e7d32; }
+        #message { text-align: center; margin-top: 20px; padding: 12px; border-radius: 8px; font-weight: 600; opacity: 0; transition: opacity 0.5s, transform 0.5s; transform: translateY(10px); }
         #message.error { background-color: #fce4e4; color: #c62828; }
         #message.loading { background-color: #fffde7; color: #fbc02d; }
         #message.show { opacity: 1; transform: translateY(0); }
@@ -87,7 +86,7 @@
 
     <script>
         // --- PENTING: GANTI DENGAN URL APPS SCRIPT ANDA ---
-        const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwFhXRPAFqMgkweuIBuM1jZFq6Vj_AJ_kk4XIsdJk0-iEPF6oST5wmbELUrS0bMhqlKiw/exec';
+        const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbxIVyPg4QNV3REolvFpYdbPmwjWiWEkbK6DrEMrUQRcMw_zyF_ZUcpFrXH2k3ZJ_d8ZeA/exec';
         // --- AKHIR PENTING ---
 
         const USER_TABLE_BODY = document.getElementById('userTableBody');
@@ -114,6 +113,9 @@
                 LOADING_MESSAGE.textContent = text;
                 LOADING_MESSAGE.style.display = 'block';
                 return; 
+            } else {
+                MESSAGE_ELEMENT.style.backgroundColor = '#e8f5e9';
+                MESSAGE_ELEMENT.style.color = '#2e7d32';
             }
 
             setTimeout(() => {
@@ -167,7 +169,6 @@
         function renderTokoFilter(tokoList) {
             TOKO_FILTER.innerHTML = '';
             
-            // Tambahkan opsi "Semua Toko" hanya untuk Admin Master
             if (adminSession.status === 'MASTER') {
                 const allOption = document.createElement('option');
                 allOption.value = 'ALL';
@@ -175,7 +176,6 @@
                 TOKO_FILTER.appendChild(allOption);
             }
             
-            // Tambahkan opsi toko yang sebenarnya
             tokoList.forEach(toko => {
                 const option = document.createElement('option');
                 option.value = toko;
@@ -183,7 +183,6 @@
                 TOKO_FILTER.appendChild(option);
             });
 
-            // Set default selection
             if (adminSession.status === 'MASTER') {
                 TOKO_FILTER.value = 'ALL';
             } else {
@@ -212,7 +211,7 @@
             SAVE_BUTTON.disabled = true;
 
             if (users.length === 0) {
-                USER_TABLE_BODY.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #aaa;">Tidak ada pengguna ditemukan untuk toko ini.</td></tr>';
+                USER_TABLE_BODY.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #aaa;">Tidak ada pengguna ditemukan untuk filter ini.</td></tr>';
                 return;
             }
 
@@ -230,10 +229,8 @@
                 select.className = `status-select ${user.status.toUpperCase()}`;
                 select.dataset.originalStatus = user.status;
                 
-                // Status yang tersedia (sesuai permintaan user: MASTER, SUB_ADMIN, AKTIF, DITOLAK, PENDING)
                 const statuses = ['PENDING', 'AKTIF', 'SUB_ADMIN', 'DITOLAK'];
                 
-                // Tambahkan MASTER hanya jika admin master atau user itu sendiri MASTER
                 if (adminSession.status === 'MASTER' || user.status === 'MASTER') {
                     statuses.push('MASTER');
                 }
@@ -286,7 +283,7 @@
                 
                 allUsers = response.users;
                 renderTokoFilter(response.tokoList);
-                filterUsers(); // Panggil filterUsers untuk render awal
+                filterUsers(); 
                 
             } catch (error) {
                 MAIN_CONTENT.style.display = 'none';
@@ -338,7 +335,6 @@
             }
             
             const user = JSON.parse(session);
-            // Hanya user MASTER dan SUB_ADMIN yang boleh di halaman ini
             if (user.status !== 'MASTER' && user.status !== 'SUB_ADMIN') {
                 alert(`Akses Ditolak. Status Anda: ${user.status}. Anda akan diarahkan ke Halaman Utama.`);
                 window.location.href = './main.html';
