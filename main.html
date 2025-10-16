@@ -9,7 +9,7 @@
     <script src="https://unpkg.com/@zxing/library@latest"></script>
     
     <style>
-        /* CSS yang sudah disesuaikan, termasuk untuk tombol Admin Panel */
+        /* CSS yang sama */
         :root { --primary-color: #00796b; --secondary-color: #ff9800; --danger-color: #f44336; --text-color: #333; --bg-color: #eceff1; --card-bg: #ffffff; --border-radius: 12px; --shadow-heavy: 0 10px 30px rgba(0, 0, 0, 0.15); --scan-glow-color: #00ff00; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
         body { background-color: var(--bg-color); display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 20px; color: var(--text-color); }
@@ -123,7 +123,7 @@
                 <input type="date" id="tanggal" name="tanggal" required>
             </div>
 
-            <button type="submit" id="saveButton" class="save-btn"><i class="fas fa-upload"></i> SIMPAN TRANSAKSI </button>
+            <button type="submit" id="saveButton" class="save-btn"><i class="fas fa-upload"></i> SIMPAN </button>
             <p id="message" class="message"></p>
         </form>
         
@@ -132,7 +132,7 @@
 
     <script>
         // --- PENTING: GANTI DENGAN URL APPS SCRIPT ANDA ---
-        const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwFhXRPAFqMgkweuIBuM1jZFq6Vj_AJ_kk4XIsdJk0-iEPF6oST5wmbELUrS0bMhqlKiw/exec';
+        const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbzD2sVr6PNXm18m2aYuK0nAynGZta_Ew3cd8UJwKDDbyRYfR9C1-ciEU6aTDv4oT_LuuA/exec';
         // --- AKHIR PENTING ---
 
         const INVENTORY_FORM = document.getElementById('inventoryForm');
@@ -155,13 +155,7 @@
             MESSAGE_ELEMENT.textContent = text;
             MESSAGE_ELEMENT.classList.remove('show', 'error', 'loading', 'success');
             
-            if (type === 'error') {
-                MESSAGE_ELEMENT.classList.add('error');
-            } else if (type === 'loading') {
-                MESSAGE_ELEMENT.classList.add('loading');
-            } else {
-                MESSAGE_ELEMENT.classList.add('success');
-            }
+            MESSAGE_ELEMENT.classList.add(type);
 
             setTimeout(() => {
                 MESSAGE_ELEMENT.classList.add('show');
@@ -174,7 +168,7 @@
             }
         }
         
-        async function sendApiRequest(action, data = {}) {
+        async function sendApiRequest(action, data = {}, method = 'POST') {
             const payload = { action, ...data };
             const cacheBuster = `?t=${new Date().getTime()}`; 
             const targetUrl = GAS_API_URL + cacheBuster; 
@@ -244,11 +238,10 @@
         }
         
         // --- SCANNER LOGIC (ZXING-JS) ---
-
+        // (Tetap sama)
         async function startScanner() {
             if (!codeReader) {
                  codeReader = new ZXing.BrowserMultiFormatReader();
-                 // Pengecekan izin kamera
                  try {
                      videoInputDevices = await codeReader.getVideoInputDevices();
                  } catch (e) {
@@ -299,6 +292,7 @@
 
 
         // --- HANDLERS ---
+        // (Tetap sama)
 
         function handleMinusToggle() {
             let currentValue = QTY_INPUT.value.trim();
@@ -331,7 +325,7 @@
                 barcode: BARCODE_INPUT.value.trim(),
                 qty: qtyValue,
                 user: userSession.nama,
-                toko: userSession.toko
+                toko: userSession.toko // Mengirim nama toko, bukan ssId, karena ssId sudah ada di GAS
             };
 
             if (!data.lokasi || !data.barcode || !data.qty) {
@@ -368,7 +362,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             if (!checkAuthentication()) return;
 
-            // Event Listeners
             document.getElementById('logoutButton').addEventListener('click', () => {
                 stopScanner();
                 localStorage.removeItem('userSession');
