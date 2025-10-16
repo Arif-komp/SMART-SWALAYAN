@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* CSS Dasar (diambil dari style sebelumnya) */
+        /* CSS Dasar */
         :root { --primary-color: #00796b; --secondary-color: #ff9800; --danger-color: #f44336; --text-color: #333; --bg-color: #eceff1; --card-bg: #ffffff; --border-radius: 12px; --shadow-heavy: 0 10px 30px rgba(0, 0, 0, 0.15); }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-color); padding: 20px; }
@@ -19,6 +19,25 @@
         .admin-header button { padding: 10px 15px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; background-color: var(--danger-color); color: white; transition: background-color 0.2s; }
         .admin-header button:hover { background-color: #d32f2f; }
         
+        .filter-group { 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: var(--border-radius);
+            background-color: #f7fcfc;
+        }
+        .filter-group label { font-weight: 600; color: var(--primary-color); }
+        .filter-group select { 
+            padding: 10px 15px; 
+            border: 1px solid #ccc; 
+            border-radius: 8px; 
+            flex-grow: 1;
+            max-width: 300px;
+        }
+
         /* Tabel Daftar Pengguna */
         #userTable { width: 100%; border-collapse: collapse; margin-top: 20px; }
         #userTable th, #userTable td { padding: 12px 15px; border: 1px solid #ddd; text-align: left; }
@@ -30,6 +49,7 @@
         .status-select.PENDING { background-color: #fffde7; color: #fbc02d; border-color: #fbc02d; }
         .status-select.AKTIF { background-color: #e8f5e9; color: #2e7d32; border-color: #2e7d32; }
         .status-select.DITOLAK { background-color: #fce4e4; color: #c62828; border-color: #c62828; }
+        .status-select.ADMIN { background-color: #e3f2fd; color: #1565c0; border-color: #1565c0; }
 
         /* Tombol Simpan */
         #saveButton {
@@ -56,24 +76,32 @@
             <button id="logoutButton"><i class="fas fa-sign-out-alt"></i> Logout</button>
         </div>
         
-        <p id="loadingMessage" class="message show loading">⏳ Memuat daftar pengguna...</p>
+        <p id="loadingMessage" class="message show loading">⏳ Memuat konfigurasi...</p>
 
-        <div id="tableContainer" style="display: none;">
-            <table id="userTable">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Nama Pengguna</th>
-                        <th>Toko</th>
-                        <th>Tanggal Daftar</th>
-                        <th>Status Akses</th>
-                    </tr>
-                </thead>
-                <tbody id="userTableBody">
-                    </tbody>
-            </table>
-            
-            <button id="saveButton" disabled><i class="fas fa-save"></i> SIMPAN PERUBAHAN</button>
+        <div id="mainContent" style="display: none;">
+            <div class="filter-group">
+                <label for="tokoFilter"><i class="fas fa-filter"></i> Filter Toko:</label>
+                <select id="tokoFilter">
+                    </select>
+            </div>
+
+            <div id="tableContainer">
+                <table id="userTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Nama Pengguna</th>
+                            <th>Toko</th>
+                            <th>Tanggal Daftar</th>
+                            <th>Status Akses</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                        </tbody>
+                </table>
+                
+                <button id="saveButton" disabled><i class="fas fa-save"></i> SIMPAN PERUBAHAN</button>
+            </div>
         </div>
 
         <p id="message" class="message"></p>
@@ -90,10 +118,14 @@
         const SAVE_BUTTON = document.getElementById('saveButton');
         const MESSAGE_ELEMENT = document.getElementById('message');
         const LOADING_MESSAGE = document.getElementById('loadingMessage');
-        const TABLE_CONTAINER = document.getElementById('tableContainer');
-        let currentUsers = []; // Menyimpan data pengguna saat ini
+        const MAIN_CONTENT = document.getElementById('mainContent');
+        const TOKO_FILTER = document.getElementById('tokoFilter');
+        
+        let allUsers = []; // Menyimpan semua data pengguna (Admin Master) atau data toko sendiri (Admin Toko)
+        let currentUsersDisplayed = []; // Data yang sedang ditampilkan
         let changesMade = false;
-
+        let adminSession = null;
+        
         function displayMessage(text, type = 'success') {
             LOADING_MESSAGE.style.display = 'none';
             MESSAGE_ELEMENT.textContent = text;
@@ -105,7 +137,7 @@
                 MESSAGE_ELEMENT.classList.add('loading');
                 LOADING_MESSAGE.textContent = text;
                 LOADING_MESSAGE.style.display = 'block';
-                return; // Jangan sembunyikan loading
+                return; 
             }
 
             setTimeout(() => {
@@ -156,19 +188,63 @@
         
         // --- ADMIN LOGIC ---
 
+        function renderTokoFilter(tokoList) {
+            TOKO_FILTER.innerHTML = '';
+            
+            // Tambahkan opsi "Semua Toko" hanya untuk Admin Master
+            if (adminSession.status === 'ADMIN') {
+                const allOption = document.createElement('option');
+                allOption.value = 'ALL';
+                allOption.textContent = '-- Semua Toko --';
+                TOKO_FILTER.appendChild(allOption);
+            }
+            
+            // Tambahkan opsi toko yang sebenarnya
+            tokoList.forEach(toko => {
+                const option = document.createElement('option');
+                option.value = toko;
+                option.textContent = toko;
+                TOKO_FILTER.appendChild(option);
+            });
+
+            // Set default selection
+            if (adminSession.status === 'ADMIN') {
+                TOKO_FILTER.value = 'ALL';
+            } else {
+                TOKO_FILTER.value = adminSession.toko;
+                TOKO_FILTER.disabled = true; // Admin Toko tidak bisa ganti toko
+            }
+            
+            TOKO_FILTER.addEventListener('change', filterUsers);
+        }
+
+        function filterUsers() {
+            const selectedToko = TOKO_FILTER.value;
+            
+            if (selectedToko === 'ALL') {
+                currentUsersDisplayed = allUsers;
+            } else {
+                currentUsersDisplayed = allUsers.filter(user => user.toko === selectedToko);
+            }
+
+            renderUserTable(currentUsersDisplayed);
+        }
+
         function renderUserTable(users) {
             USER_TABLE_BODY.innerHTML = '';
-            currentUsers = users;
             changesMade = false;
             SAVE_BUTTON.disabled = true;
 
             if (users.length === 0) {
-                USER_TABLE_BODY.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #aaa;">Tidak ada permintaan akses atau pengguna terdaftar.</td></tr>';
+                USER_TABLE_BODY.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #aaa;">Tidak ada pengguna ditemukan untuk toko ini.</td></tr>';
                 return;
             }
 
             users.forEach((user, index) => {
                 const row = USER_TABLE_BODY.insertRow();
+                // Simpan original index di data array untuk referensi saat menyimpan
+                row.dataset.originalIndex = allUsers.findIndex(u => u.nama === user.nama && u.toko === user.toko);
+                
                 row.insertCell().textContent = index + 1;
                 row.insertCell().textContent = user.nama;
                 row.insertCell().textContent = user.toko;
@@ -178,9 +254,23 @@
                 const select = document.createElement('select');
                 select.className = `status-select ${user.status.toUpperCase()}`;
                 select.dataset.originalStatus = user.status;
-                select.dataset.userIndex = index;
                 
-                const statuses = ['PENDING', 'AKTIF', 'DITOLAK', 'ADMIN'];
+                // Pilihan status yang tersedia
+                const statuses = ['PENDING', 'AKTIF', 'DITOLAK'];
+                
+                // Tambahkan ADMIN hanya jika admin master
+                if (adminSession.status === 'ADMIN') {
+                    statuses.push('ADMIN');
+                } else if (user.status === 'ADMIN') {
+                    // Jika admin toko mencoba melihat admin lain, pastikan ADMIN ada di opsi
+                    statuses.push('ADMIN');
+                }
+                
+                // Nonaktifkan dropdown jika user adalah ADMIN (kecuali yang mengedit adalah admin master)
+                if (user.status === 'ADMIN' && adminSession.status !== 'ADMIN') {
+                    select.disabled = true; 
+                }
+                
                 statuses.forEach(status => {
                     const option = document.createElement('option');
                     option.value = status;
@@ -194,37 +284,50 @@
                 select.addEventListener('change', handleStatusChange);
                 statusCell.appendChild(select);
             });
-            TABLE_CONTAINER.style.display = 'block';
+            MAIN_CONTENT.style.display = 'block';
         }
 
         function handleStatusChange(event) {
             const select = event.target;
             const newStatus = select.value;
-            const originalStatus = select.dataset.originalStatus;
-            const userIndex = select.dataset.userIndex;
 
             // Update class for styling
             select.className = `status-select ${newStatus}`;
 
-            // Check if any change was made compared to the original data
+            // Cari baris di DOM dan dapatkan originalIndex
+            const row = select.closest('tr');
+            const originalIndex = row.dataset.originalIndex;
+            
+            // Simpan perubahan ke array allUsers
+            allUsers[originalIndex].newStatus = newStatus;
+
+
+            // Check if any change was made compared to the original data in the currently displayed view
             const allSelects = document.querySelectorAll('.status-select');
             changesMade = Array.from(allSelects).some(s => s.value !== s.dataset.originalStatus);
             
             SAVE_BUTTON.disabled = !changesMade;
-
-            // Update the temporary currentUsers array for easy saving
-            currentUsers[userIndex].newStatus = newStatus;
         }
 
         async function fetchUsers() {
             displayMessage('⏳ Memuat daftar pengguna...', 'loading');
             try {
-                const response = await sendApiRequest('getAdminUsers');
-                LOADING_MESSAGE.style.display = 'none';
-                renderUserTable(response.users);
+                // Kirim status admin dan toko ke Apps Script untuk otorisasi dan filtering
+                const response = await sendApiRequest('getAdminUsers', { 
+                    toko: adminSession.toko, 
+                    isAdminMaster: adminSession.status === 'ADMIN' 
+                });
+                
+                allUsers = response.users;
+                
+                // Render filter toko
+                renderTokoFilter(response.tokoList);
+
+                // Tampilkan data sesuai filter default
+                filterUsers();
+                
             } catch (error) {
-                LOADING_MESSAGE.style.display = 'none';
-                USER_TABLE_BODY.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--danger-color);">${error.message}. Cek apakah Anda login sebagai Admin.</td></tr>`;
+                MAIN_CONTENT.style.display = 'none';
                 displayMessage(`❌ Gagal Memuat Data: ${error.message}`, 'error');
             }
         }
@@ -235,7 +338,7 @@
             displayMessage('⏳ Menyimpan perubahan status...', 'loading');
             SAVE_BUTTON.disabled = true;
 
-            const updates = currentUsers
+            const updates = allUsers
                 .filter(user => user.newStatus && user.newStatus.toUpperCase() !== user.status.toUpperCase())
                 .map(user => ({
                     nama: user.nama,
@@ -250,13 +353,19 @@
             }
 
             try {
-                const response = await sendApiRequest('updateUserStatus', { updates: JSON.stringify(updates) });
+                // Kirim status admin untuk verifikasi otoritas saat menyimpan
+                const response = await sendApiRequest('updateUserStatus', { 
+                    updates: JSON.stringify(updates),
+                    tokoAdmin: adminSession.toko, 
+                    isAdminMaster: adminSession.status === 'ADMIN' 
+                });
+                
                 displayMessage(`✅ ${response.message}`, 'success');
                 // Muat ulang tabel setelah sukses
                 await fetchUsers();
             } catch (error) {
                 displayMessage(`❌ Gagal Menyimpan: ${error.message}`, 'error');
-                SAVE_BUTTON.disabled = false; // Aktifkan tombol lagi jika gagal
+                SAVE_BUTTON.disabled = false;
             }
         }
 
@@ -268,11 +377,15 @@
                 return false;
             }
             const user = JSON.parse(session);
-            if (user.status !== 'ADMIN') {
-                alert(`Akses Ditolak. Akun Anda (${user.nama}) bukan Admin.`);
+            
+            if (user.status !== 'ADMIN' && user.status !== 'AKTIF') {
+                alert(`Akses Ditolak. Akun Anda (${user.nama}) tidak memiliki hak akses Admin.`);
                 window.location.href = './index.html';
                 return false;
             }
+            
+            // Perluasan: Kita anggap AKTIF yang terdaftar di Toko A adalah Admin Toko A (kecuali statusnya 'PENDING' atau 'DITOLAK')
+            adminSession = user;
             return true;
         }
 
