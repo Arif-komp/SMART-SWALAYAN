@@ -10,7 +10,7 @@
     
     <style>
         /* CSS Disingkat (Hanya Tambahan untuk Kapitalisasi Lokasi) */
-        :root { --primary-color: #00796b; --secondary-color: #ff9800; --danger-color: #f44336; --text-color: #333; --bg-color: #eceff1; --card-bg: #ffffff; --border-radius: 12px; --shadow-heavy: 0 10px 30px rgba(0, 0, 0, 0.15); --sparkle-color: #ffe082; --scan-glow-color: #00ff00; --mouse-x: 50%; --mouse-y: 50%; }
+        :root { --primary-color: #00796b; --secondary-color: #ff9800; --danger-color: #f44336; --text-color: #333; --bg-color: #eceff1; --card-bg: #ffffff; --border-radius: 12px; --shadow-heavy: 0 10px 30px rgba(0, 0, 0, 0.15); --scan-glow-color: #00ff00; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
         body { background-color: var(--bg-color); display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 20px; color: var(--text-color); }
         .container { background-color: var(--card-bg); padding: 30px; border-radius: var(--border-radius); box-shadow: var(--shadow-heavy); width: 100%; max-width: 450px; margin-top: 20px; transition: all 0.3s ease; }
@@ -19,28 +19,36 @@
         .user-info button { background: none; border: none; color: var(--danger-color); font-size: 1.1em; padding: 5px; cursor: pointer; }
         .input-group { margin-bottom: 20px; }
         .input-group label { display: block; margin-bottom: 8px; color: var(--primary-color); font-weight: 700; font-size: 0.95em; }
+        
+        /* Kapitalisasi Lokasi di CSS dan JS */
+        #lokasi { text-transform: uppercase; }
+
         input[type="text"], input[type="number"], input[type="date"] { width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 1em; color: var(--text-color); transition: all 0.3s; }
         input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 4px rgba(0, 121, 107, 0.2); background-color: #f7fcfc; outline: none; }
-
-        /* CSS TAMBAHAN: Kapitalisasi Lokasi */
-        #lokasi {
-            text-transform: uppercase;
-        }
 
         .input-with-icon { display: flex; align-items: stretch; }
         .input-with-icon input { flex-grow: 1; border-radius: 8px 0 0 8px; border-right: none; }
         button { cursor: pointer; border: none; font-weight: 600; transition: background-color 0.3s, transform 0.1s, box-shadow 0.3s; white-space: nowrap; padding: 12px 15px; font-size: 1.0em; min-width: 40px; }
+        
         .scan-btn, .minus-btn { color: white; border-radius: 0 8px 8px 0; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); min-width: 80px; }
         .scan-btn { background-color: var(--primary-color); }
         .minus-btn { background-color: var(--danger-color); padding: 12px 18px; min-width: 50px; }
+        .minus-btn.active { background-color: #388e3c; } /* Warna hijau saat minus diaktifkan */
+        
         .save-btn { width: 100%; padding: 15px 20px; background-color: var(--secondary-color); color: white; border-radius: 10px; font-size: 1.15em; font-weight: 700; margin-top: 30px; box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4); }
+        
+        /* SCANNERS */
         .scanner-placeholder { margin-top: 15px; width: 100%; padding-bottom: 60%; position: relative; background-color: #1a1a1a; border: 3px solid #ccc; border-radius: 10px; display: none; overflow: hidden; }
-        .scanner-placeholder.active { display: block; border-color: var(--primary-color); background-color: #000; background-image: radial-gradient( circle at var(--mouse-x, 50%) var(--mouse-y, 50%), var(--sparkle-color) 0%, rgba(0, 0, 0, 0) 25% ); }
+        .scanner-placeholder.active { display: block; border-color: var(--primary-color); background-color: #000; }
         #video-feed { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 5; }
         .scanner-line { position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: linear-gradient(to right, transparent 0%, var(--scan-glow-color) 30%, var(--scan-glow-color) 70%, transparent 100%); z-index: 50; display: none; }
         .scanner-placeholder.active .scanner-line { display: block; animation: scan-radar 2s infinite linear; }
         @keyframes scan-radar { 0% { transform: translateY(0); opacity: 0.1; } 55% { transform: translateY(calc(100% - 5px)); opacity: 1; } 100% { transform: translateY(0); opacity: 0.1; } }
-        .message { text-align: center; margin-top: 20px; padding: 12px; border-radius: 8px; font-weight: 600; background-color: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; opacity: 0; transition: opacity 0.5s, transform 0.5s; transform: translateY(10px); }
+        #scanner-message { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #ccc; font-size: 1.2em; z-index: 20; }
+        
+        /* MESSAGES */
+        .message { text-align: center; margin-top: 20px; padding: 12px; border-radius: 8px; font-weight: 600; opacity: 0; transition: opacity 0.5s, transform 0.5s; transform: translateY(10px); }
+        .message.success { background-color: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
         .message.error { background-color: #fce4e4; color: #c62828; border-color: #ef9a9a; }
         .message.loading { background-color: #fffde7; color: #fbc02d; border-color: #fff9c4; }
         .message.show { opacity: 1; transform: translateY(0); }
@@ -58,7 +66,7 @@
         <form id="inventoryForm">
 
             <div class="input-group">
-                <label for="lokasi"><i class="fas fa-warehouse"></i> Lokasi </label>
+                <label for="lokasi"><i class="fas fa-warehouse"></i> Lokasi</label>
                 <input type="text" 
                     id="lokasi" 
                     name="lokasi" 
@@ -70,7 +78,7 @@
             <div class="input-group barcode-group">
                 <label for="barcode"><i class="fas fa-barcode"></i> Barcode Barang</label>
                 <div class="input-with-icon">
-                    <input type="text" id="barcode" name="barcode" placeholder="Scan atau input Barcode" required>
+                    <input type="text" id="barcode" name="barcode" placeholder="Pindai atau input Barcode" required>
                     <button type="button" id="scanButton" class="scan-btn" title="Klik untuk Scan Barcode">
                         <i class="fas fa-camera-retro"></i> SCAN
                     </button>
@@ -79,7 +87,7 @@
                 <div id="scanner-container" class="scanner-placeholder">
                     <video id="video-feed" playsinline></video>
                     <div class="scanner-line"></div> 
-                    <p id="scanner-message">Area Scanner Barcode</p>
+                    <p id="scanner-message">Arahkan kamera ke Barcode</p>
                 </div>
             </div>
 
@@ -89,220 +97,283 @@
                     <input type="number" 
                         id="qty" 
                         name="qty" 
-                        placeholder="Masukkan jumlah (+/-)" 
+                        placeholder="Masukkan jumlah" 
                         required
                         inputmode="decimal"
                         pattern="^-?\d*\.?\d*$">
                         
-                    <button type="button" id="minusButton" class="minus-btn" title="Klik untuk Tambah Tanda Minus">
+                    <button type="button" id="minusButton" class="minus-btn" title="Klik untuk Tambah/Hapus Tanda Minus">
                         <i class="fas fa-minus"></i>
                     </button>
                 </div>
             </div>
 
             <div class="input-group">
-                <label for="tanggal"><i class="fas fa-calendar-alt"></i> Tanggal</label>
-                <input type="date" id="tanggal" name="tanggal" value="" required>
+                <label for="tanggal"><i class="fas fa-calendar-alt"></i> Tanggal Transaksi</label>
+                <input type="date" id="tanggal" name="tanggal" required>
             </div>
 
-            <button type="submit" id="saveButton" class="save-btn"><i class="fas fa-save"></i> SIMPAN </button>
+            <button type="submit" id="saveButton" class="save-btn"><i class="fas fa-upload"></i> SIMPAN TRANSAKSI </button>
             <p id="message" class="message"></p>
         </form>
-        
-        <div id="app-footer-copyright" class="footer-copyright"></div>
     </div>
 
     <script>
-        // --- PENTING: GANTI DENGAN URL APPS SCRIPT ANDA (SAMA DENGAN INDEX.HTML) ---
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzmnPqnVAVVr_NfhRgHisIm_HicnvTpICV14S88neBItmQpCGiJREDLX1_4GWPhLR7kKg/exec';
+        // --- PENTING: GANTI DENGAN URL APPS SCRIPT ANDA ---
+        const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbxIVyPg4QNV3REolvFpYdbPmwjWiWEkbK6DrEMrUQRcMw_zyF_ZUcpFrXH2k3ZJ_d8ZeA/exec';
         // --- AKHIR PENTING ---
 
-        let userSession = null; 
-        let isScanning = false;
-        const codeReader = new ZXing.BrowserMultiFormatReader(); 
+        const INVENTORY_FORM = document.getElementById('inventoryForm');
+        const MESSAGE_ELEMENT = document.getElementById('message');
+        const QTY_INPUT = document.getElementById('qty');
+        const MINUS_BUTTON = document.getElementById('minusButton');
+        const BARCODE_INPUT = document.getElementById('barcode');
+        const SCAN_BUTTON = document.getElementById('scanButton');
+        const SCANNER_CONTAINER = document.getElementById('scanner-container');
+        const VIDEO_FEED = document.getElementById('video-feed');
+        const USER_INFO_TEXT = document.getElementById('userInfoText');
+        
+        let userSession = null;
+        let codeReader = null;
+        let videoInputDevices = [];
+        
+        // --- UTILITY FUNCTIONS ---
 
-        // Fungsi Utilities
         function displayMessage(text, type = 'success') {
-            const messageElement = document.getElementById('message');
-            messageElement.textContent = text;
-            messageElement.classList.remove('show', 'error', 'loading');
+            MESSAGE_ELEMENT.textContent = text;
+            MESSAGE_ELEMENT.classList.remove('show', 'error', 'loading', 'success');
             
-            if (type === 'error') { messageElement.classList.add('error'); } 
-            else if (type === 'loading') { messageElement.classList.add('loading'); }
+            if (type === 'error') {
+                MESSAGE_ELEMENT.classList.add('error');
+            } else if (type === 'loading') {
+                MESSAGE_ELEMENT.classList.add('loading');
+            } else {
+                MESSAGE_ELEMENT.classList.add('success');
+            }
 
-            setTimeout(() => { messageElement.classList.add('show'); }, 10); 
+            setTimeout(() => {
+                MESSAGE_ELEMENT.classList.add('show');
+            }, 10); 
 
             if (type !== 'loading') {
-                setTimeout(() => { messageElement.classList.remove('show'); }, 5000);
+                setTimeout(() => {
+                    MESSAGE_ELEMENT.classList.remove('show');
+                }, 5000);
             }
         }
         
-        // Pengecekan Sesi dan Logika Logout
-        function checkUserSession() {
-            const sessionData = sessionStorage.getItem('userSession');
-            const userInfoText = document.getElementById('userInfoText');
-
-            if (!sessionData) {
-                alert('Sesi habis atau belum login. Harap masuk kembali.');
-                window.location.href = './index.html'; 
-                return false;
-            }
+        async function sendApiRequest(action, data = {}) {
+            const payload = { action, ...data };
+            const cacheBuster = `?t=${new Date().getTime()}`; 
+            const targetUrl = GAS_API_URL + cacheBuster; 
+            const bodyData = new URLSearchParams(payload).toString();
 
             try {
-                userSession = JSON.parse(sessionData);
+                const response = await fetch(targetUrl, { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, 
+                    body: bodyData
+                });
                 
-                // Menampilkan Nama User dan Toko
-                userInfoText.innerHTML = `<i class="fas fa-user-circle"></i> ${userSession.nama} (${userSession.toko})`; 
+                const responseText = await response.text();
                 
-                return true;
-            } catch (e) {
-                sessionStorage.removeItem('userSession');
-                alert('Data sesi rusak. Harap masuk kembali.');
-                window.location.href = './index.html'; 
-                return false;
+                try {
+                    const responseData = JSON.parse(responseText);
+
+                    if (responseData.status === 'error') {
+                        throw new Error(responseData.message); 
+                    }
+
+                    return responseData;
+                    
+                } catch (e) {
+                     console.error("Gagal parse JSON. Respons dari Apps Script:", responseText);
+                     throw new Error('Respons Apps Script tidak valid. Cek konfigurasi Apps Script/izin.');
+                }
+                
+            } catch (error) {
+                console.error("API Request Failed:", error);
+                throw new Error(error.message || 'Koneksi Apps Script Gagal.');
             }
         }
 
-        function handleLogout() {
-            if (isScanning) stopScanner();
-            sessionStorage.removeItem('userSession');
-            alert('Anda telah keluar.');
-            window.location.href = './index.html';
+        // --- AUTHENTICATION & SESSION ---
+
+        function checkAuthentication() {
+            const session = localStorage.getItem('userSession');
+            if (!session) {
+                alert('Sesi berakhir. Silakan login kembali.');
+                window.location.href = './index.html';
+                return false;
+            }
+            
+            const user = JSON.parse(session);
+            // Hanya user AKTIF yang boleh di halaman ini
+            if (user.status !== 'AKTIF') {
+                alert(`Akses Ditolak. Status Anda: ${user.status}. Anda akan diarahkan ke Halaman Admin/Login.`);
+                localStorage.removeItem('userSession'); 
+                window.location.href = (user.status === 'MASTER' || user.status === 'SUB_ADMIN') ? './admin.html' : './index.html';
+                return false;
+            }
+            
+            userSession = user;
+            USER_INFO_TEXT.innerHTML = `<i class="fas fa-user-circle"></i> ${user.nama} | Toko: ${user.toko}`;
+            
+            // Set tanggal hari ini
+            const today = new Date();
+            const dateString = today.toISOString().split('T')[0];
+            document.getElementById('tanggal').value = dateString;
+            
+            return true;
+        }
+        
+        // --- SCANNER LOGIC (ZXING-JS) ---
+        
+        async function startScanner() {
+            if (!codeReader) {
+                 codeReader = new ZXing.BrowserMultiFormatReader();
+                 // Mendapatkan daftar kamera
+                 videoInputDevices = await codeReader.getVideoInputDevices();
+            }
+
+            if (videoInputDevices.length === 0) {
+                displayMessage('❌ Gagal: Tidak ada perangkat kamera ditemukan.', 'error');
+                return;
+            }
+
+            // Memilih kamera belakang (jika ada) atau kamera pertama
+            const rearCamera = videoInputDevices.find(device => device.label.toLowerCase().includes('back')) || videoInputDevices[0];
+            
+            SCANNER_CONTAINER.classList.add('active');
+            SCAN_BUTTON.textContent = 'STOP SCAN';
+            SCAN_BUTTON.classList.remove('scan-btn');
+            SCAN_BUTTON.classList.add('minus-btn'); // Ganti warna tombol saat aktif
+
+            try {
+                codeReader.decodeFromVideoDevice(rearCamera.deviceId, 'video-feed', (result, err) => {
+                    if (result) {
+                        BARCODE_INPUT.value = result.text.trim();
+                        stopScanner();
+                        // Fokus ke kolom QTY setelah scan
+                        QTY_INPUT.focus(); 
+                    }
+                    if (err && !(err instanceof ZXing.NotFoundException)) {
+                        // Error lain selain 'tidak ditemukan'
+                        console.error(err);
+                    }
+                });
+            } catch (error) {
+                displayMessage('❌ Gagal memulai kamera. Pastikan izin kamera telah diberikan.', 'error');
+                console.error(error);
+                stopScanner();
+            }
+        }
+        
+        function stopScanner() {
+            if (codeReader) {
+                codeReader.reset();
+            }
+            SCANNER_CONTAINER.classList.remove('active');
+            SCAN_BUTTON.textContent = 'SCAN';
+            SCAN_BUTTON.classList.remove('minus-btn');
+            SCAN_BUTTON.classList.add('scan-btn');
         }
 
-        // Logika Scanner Barcode
-        const stopScanner = () => {
-            if (!isScanning) return;
-            isScanning = false;
-            codeReader.reset();
-            document.getElementById('scanner-container').classList.remove('active');
-            document.getElementById('video-feed').style.display = 'none';
-            document.getElementById('scanner-message').style.display = 'block';
-            document.getElementById('scanButton').innerHTML = '<i class="fas fa-camera-retro"></i> SCAN';
-        };
+        // --- HANDLERS ---
 
-        const startScanner = () => {
-            isScanning = true;
-            const scannerContainer = document.getElementById('scanner-container');
-            scannerContainer.classList.add('active');
-            document.getElementById('video-feed').style.display = 'block';
-            document.getElementById('scanner-message').style.display = 'none';
-            document.getElementById('scanButton').innerHTML = '<i class="fas fa-stop-circle"></i> STOP';
-            displayMessage('Mengaktifkan kamera... Arahkan ke barcode.', 'loading');
+        function handleMinusToggle() {
+            let currentValue = QTY_INPUT.value.trim();
+            if (currentValue === '') {
+                QTY_INPUT.value = '-';
+                MINUS_BUTTON.classList.add('active');
+                return;
+            }
+
+            if (currentValue.startsWith('-')) {
+                // Hapus tanda minus
+                QTY_INPUT.value = currentValue.substring(1);
+                MINUS_BUTTON.classList.remove('active');
+            } else {
+                // Tambahkan tanda minus
+                QTY_INPUT.value = '-' + currentValue;
+                MINUS_BUTTON.classList.add('active');
+            }
+            QTY_INPUT.focus();
+        }
+
+        async function handleFormSubmit(e) {
+            e.preventDefault();
             
-            codeReader.decodeFromVideoDevice(
-                undefined, 
-                'video-feed', 
-                (result, error) => {
-                    if (result) {
-                        const scannedCode = result.text;
-                        document.getElementById('barcode').value = scannedCode;
-                        stopScanner(); 
-                        displayMessage(`✅ Barcode ${scannedCode} berhasil di-scan!`);
-                        document.getElementById('qty').focus();
-                    } else if (error && !(error instanceof ZXing.NotFoundException)) {
-                        console.error('Scan Error:', error);
-                    }
-                },
-                { video: { facingMode: 'environment' } } 
-            ).catch(err => {
-                console.error('Kamera gagal diakses:', err);
-                stopScanner();
-                displayMessage('❌ Gagal mengakses kamera. Pastikan browser memiliki izin HTTPS.', 'error');
-            });
-        };
+            stopScanner(); // Pastikan scanner mati sebelum submit
 
+            const qtyValue = QTY_INPUT.value.trim();
+
+            const data = {
+                tanggal: document.getElementById('tanggal').value,
+                lokasi: document.getElementById('lokasi').value.trim(),
+                barcode: BARCODE_INPUT.value.trim(),
+                qty: qtyValue,
+                user: userSession.nama,
+                toko: userSession.toko
+            };
+
+            if (!data.lokasi || !data.barcode || !data.qty) {
+                displayMessage('❌ Harap isi semua kolom input.', 'error');
+                return;
+            }
+            
+            // Validasi QTY sebagai angka
+            if (isNaN(Number(data.qty))) {
+                displayMessage('❌ Kuantitas (QTY) harus berupa angka yang valid.', 'error');
+                return;
+            }
+            
+            displayMessage('⏳ Mengirim data transaksi...', 'loading');
+
+            try {
+                const response = await sendApiRequest('saveInventory', data);
+                
+                displayMessage(`✅ ${response.message}`, 'success');
+                
+                // Reset kolom input (kecuali Lokasi)
+                BARCODE_INPUT.value = '';
+                QTY_INPUT.value = '';
+                MINUS_BUTTON.classList.remove('active');
+                
+                // Fokus kembali ke Barcode atau Lokasi
+                document.getElementById('lokasi').focus(); 
+                
+            } catch (err) {
+                displayMessage('❌ Gagal Menyimpan: ' + err.message, 'error');
+            }
+        }
+
+
+        // --- MAIN INITIALIZATION ---
 
         document.addEventListener('DOMContentLoaded', () => {
-            if (!checkUserSession()) { return; }
+            if (!checkAuthentication()) return;
 
-            const form = document.getElementById('inventoryForm');
-            const tanggalInput = document.getElementById('tanggal');
-            const qtyInput = document.getElementById('qty');
-            const lokasiInput = document.getElementById('lokasi');
-            
-            document.getElementById('logoutButton').addEventListener('click', handleLogout);
-            document.getElementById('scanButton').addEventListener('click', () => {
-                if (isScanning) { stopScanner(); } else { startScanner(); }
+            // Event Listeners
+            document.getElementById('logoutButton').addEventListener('click', () => {
+                stopScanner();
+                localStorage.removeItem('userSession');
+                window.location.href = './index.html';
             });
             
-            // Tambahan: Enforce uppercase saat user mengetik (jika oninput di HTML terlewat)
-            lokasiInput.addEventListener('input', function() {
-                this.value = this.value.toUpperCase();
-            });
-
-            // Set Tanggal Otomatis
-            const setTodayDate = () => {
-                const today = new Date();
-                const yyyy = today.getFullYear();
-                const mm = String(today.getMonth() + 1).padStart(2, '0');
-                const dd = String(today.getDate()).padStart(2, '0');
-                tanggalInput.value = `${yyyy}-${mm}-${dd}`;
-            };
-            setTodayDate();
-            lokasiInput.focus();
-            
-            // Logika Tombol Minus
-            document.getElementById('minusButton').addEventListener('click', () => {
-                const value = qtyInput.value.trim();
-                // Tetap menggunakan logika JS yang sama untuk toggle tanda minus
-                qtyInput.value = value.startsWith('-') ? value.substring(1) : '-' + value;
-                qtyInput.focus();
-            });
-
-            // Logika Pengiriman Form
-            form.addEventListener('submit', (e) => {
-                e.preventDefault();
-
-                if (isScanning) { stopScanner(); }
-                
-                // Pastikan qty adalah angka yang valid (meskipun input type=number)
-                const qtyValue = parseFloat(qtyInput.value);
-                if (isNaN(qtyValue)) {
-                    displayMessage('❌ Jumlah (QTY) harus berupa angka.', 'error');
-                    qtyInput.focus();
-                    return;
+            SCAN_BUTTON.addEventListener('click', () => {
+                if (SCANNER_CONTAINER.classList.contains('active')) {
+                    stopScanner();
+                } else {
+                    startScanner();
                 }
-
-                const data = {
-                    action: 'saveInventory', 
-                    lokasi: lokasiInput.value,
-                    barcode: document.getElementById('barcode').value,
-                    qty: qtyValue.toString(), // Kirim sebagai string agar Apps Script memprosesnya
-                    tanggal: tanggalInput.value,
-                    user: userSession.nama, // Nama Pengguna
-                    toko: userSession.toko  // Nama Toko
-                };
-
-                displayMessage('⏳ Data sedang dikirim...', 'loading');
-                form.reset(); 
-                setTodayDate();
-                lokasiInput.focus();
-                
-                const formData = new URLSearchParams(data).toString();
-                
-                // Menggunakan fetch dengan no-cors untuk Apps Script
-                fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: formData, 
-                })
-                .then(() => {
-                    // UI Optimis: Asumsi sukses karena no-cors tidak bisa baca status
-                    displayMessage('✅ Transaksi berhasil disimpan!');
-                })
-                .catch(error => {
-                    console.error('Error saat fetch:', error);
-                    displayMessage('❌ Gagal mengirim data. Cek URL Apps Script atau koneksi.', 'error');
-                });
             });
-
-            // Copyright
-            document.getElementById('app-footer-copyright').textContent = `© ${new Date().getFullYear()} Smart Swalayan.`;
             
-            // Clean up ZXing
-            window.addEventListener('beforeunload', () => { if (isScanning) { codeReader.reset(); } });
+            MINUS_BUTTON.addEventListener('click', handleMinusToggle);
+            INVENTORY_FORM.addEventListener('submit', handleFormSubmit);
+
+            // Set fokus awal ke Lokasi
+            document.getElementById('lokasi').focus();
         });
     </script>
 </body>
