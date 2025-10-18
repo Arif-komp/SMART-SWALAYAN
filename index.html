@@ -6,6 +6,7 @@
     <title>Sistem Logistik - Login</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
+        /* ... (Gunakan CSS dari jawaban sebelumnya) ... */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f4f7f6;
@@ -29,7 +30,7 @@
 
         h2 {
             margin-bottom: 25px;
-            color: #1e88e5; /* Biru terang */
+            color: #1e88e5; 
         }
 
         .input-group {
@@ -154,7 +155,7 @@
                     placeholder="Masukkan Nama Anda" 
                     required
                     oninput="this.value = this.value.toUpperCase()"> 
-                </div>
+            </div>
             
             <div class="input-group">
                 <label for="toko"><i class="fas fa-store"></i> Pilih Toko</label>
@@ -175,7 +176,7 @@
 
     <script>
         // --- PENTING: GANTI DENGAN URL APPS SCRIPT ANDA ---
-        const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwUvS8PJVSZLmeyabHLMlCYdYf7v_INBwjB8VxS-4MNGEEk1IaDjSGQGv9mLdQEj8OH8A/exec'; 
+        const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwOVmbAtdQZtNCRXdxsYMnvCQmuCp_BzMLsIzIRmeLmyAUrrsgihDi2Efv4En0N542ZnQ/exec'; 
         // --- AKHIR PENTING ---
 
         const LOGIN_FORM = document.getElementById('loginForm');
@@ -199,27 +200,30 @@
             }
         }
         
-        // Fungsi API Request (menggunakan LET targetUrl untuk GET)
+        // --- FUNGSI API REQUEST (ANTI-CORS: Menggunakan form-urlencoded) ---
         async function sendApiRequest(action, data = {}, method = 'POST') {
             const payload = { action, ...data };
-            const cacheBuster = `?t=${new Date().getTime()}`; 
             
-            let targetUrl = GAS_API_URL + cacheBuster; // Menggunakan 'let'
+            // PENTING: Menggunakan URLSearchParams untuk format form-encoded
+            const body = new URLSearchParams(payload).toString(); 
             
+            let targetUrl = GAS_API_URL;
             const options = {
                 method: method,
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                // PENTING: Header ini harus dikirim jika method POST
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, 
             };
             
             if (method === 'POST') {
-                options.body = new URLSearchParams(payload).toString();
+                options.body = body;
             } else if (method === 'GET') {
+                // Untuk GET, Apps Script membaca data dari URL parameters
                 const searchParams = new URLSearchParams(payload);
-                targetUrl += '&' + searchParams.toString();
+                targetUrl += '?' + searchParams.toString();
                 delete options.body; 
+                delete options.headers; 
             }
 
-            // Fetch request
             const response = await fetch(targetUrl, options);
             const responseText = await response.text();
             
@@ -227,23 +231,31 @@
                 const responseData = JSON.parse(responseText);
 
                 if (responseData.status === 'error') {
-                    // Ini menangani error dari Apps Script
+                    // Jika Apps Script mengirim status error yang valid
+                    console.error("Error Log dari Apps Script:", responseData.message); 
                     throw new Error(responseData.message); 
                 }
 
                 return responseData;
                 
             } catch (e) {
-                 console.error("Gagal parse JSON atau Error Apps Script. Respons:", responseText, e);
-                 // Ini menangani error jaringan (Failed to fetch) atau JSON invalid
-                 throw new Error('Gagal berkomunikasi dengan server. Cek koneksi internet atau URL Apps Script.');
+                 // Menangkap error parsing atau kegagalan jaringan
+                 console.error("Gagal Parse JSON atau Kesalahan Jaringan:", responseText, e); 
+                 
+                 // Jika error adalah error spesifik Apps Script (yang sudah dilempar di atas), teruskan
+                 if (e.message && e.message.includes('Status akun Anda') || e.message.includes('Toko yang dipilih tidak')) {
+                     throw e; 
+                 }
+                 
+                 // Jika error bukan dari Apps Script, lempar error umum
+                 throw new Error('Gagal berkomunikasi dengan server. Cek URL Apps Script atau koneksi internet.');
             }
         }
         
         async function loadTokoList() {
+            // ... (Logika loadTokoList) ...
             TOKO_SELECT.innerHTML = '<option value="">-- Memuat Toko... --</option>';
             try {
-                // Menggunakan GET untuk mengambil daftar toko
                 const response = await sendApiRequest('getTokoList', {}, 'GET'); 
                 const tokoList = response.tokoList || [];
                 
@@ -281,7 +293,7 @@
             document.getElementById('loginButton').disabled = true;
 
             try {
-                const data = { nama, toko };
+                const data = { action: 'login', nama, toko };
                 const response = await sendApiRequest('login', data, 'POST');
                 
                 // Simpan sesi pengguna
@@ -292,16 +304,17 @@
                 // Arahkan berdasarkan status
                 if (response.user.status === 'MASTER' || response.user.status === 'SUB_ADMIN') {
                     setTimeout(() => {
-                        window.location.href = './admin.html'; // Contoh redirect ke halaman Admin
+                        window.location.href = './admin.html'; 
                     }, 1500);
-                } else if (response.user.status === 'AKTIF') {
+                } else {
                     setTimeout(() => {
-                        window.location.href = './main.html'; // Contoh redirect ke halaman Transaksi
+                        window.location.href = './main.html'; 
                     }, 1500);
                 }
                 
             } catch (error) {
-                displayMessage('❌ Login Gagal: ' + error.message, 'error');
+                // --- PERBAIKAN: Menangkap dan menampilkan error spesifik dari Apps Script ---
+                displayMessage(error.message, 'error'); 
                 document.getElementById('loginButton').disabled = false;
             }
         }
@@ -311,7 +324,6 @@
             const session = localStorage.getItem('userSession');
             if (session) {
                 const user = JSON.parse(session);
-                // Jika sudah ada sesi aktif, langsung redirect
                 if (user.status === 'MASTER' || user.status === 'SUB_ADMIN') {
                      window.location.href = './admin.html';
                 } else if (user.status === 'AKTIF') {
