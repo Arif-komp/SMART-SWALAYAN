@@ -3,194 +3,293 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SMART SWALAYAN - PANEL ADMIN</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
+    <title>Sistem Logistik - Admin Panel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
-        /* CSS yang sama */
-        :root { --primary-color: #00796b; --secondary-color: #ff9800; --danger-color: #f44336; --text-color: #333; --bg-color: #eceff1; --card-bg: #ffffff; --border-radius: 12px; --shadow-heavy: 0 10px 30px rgba(0, 0, 0, 0.15); }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
-        body { background-color: var(--bg-color); display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 20px; color: var(--text-color); }
-        .container { background-color: var(--card-bg); padding: 30px; border-radius: var(--border-radius); box-shadow: var(--shadow-heavy); width: 100%; max-width: 800px; margin-top: 20px; transition: all 0.3s ease; }
-        .header-logo { display: block; max-width: 100%; max-height: 70px; margin: 0 auto 20px auto; border-radius: 8px; border: 2px solid var(--primary-color); }
-        h1 { text-align: center; color: var(--primary-color); margin-bottom: 25px; font-size: 1.6em; }
-
-        .user-info { background-color: #e0f2f1; padding: 10px 15px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9em; color: var(--primary-color); display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
-        .user-info button { background: none; border: none; color: var(--danger-color); font-size: 1.1em; padding: 5px; cursor: pointer; }
-
-        /* Navigasi Admin & Simpan */
-        .admin-nav { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 20px; }
-        .admin-nav button, #saveChangesButton { 
-            padding: 10px 15px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s;
-        }
-        #goToMainButton { background-color: #03a9f4; color: white; } /* Biru muda */
-        #goToMainButton:hover { background-color: #0288d1; }
-        
-        #saveChangesButton {
-            width: 100%; padding: 15px 20px; background-color: var(--secondary-color); color: white; margin-top: 20px;
-        }
-        #saveChangesButton:disabled { background-color: #ccc; cursor: not-allowed; }
-
-        /* Tabel */
-        .table-responsive { overflow-x: auto; }
-        .user-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.9em; }
-        .user-table th, .user-table td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-        .user-table th { background-color: var(--primary-color); color: white; position: sticky; top: 0; }
-        .user-table tr:hover { background-color: #f5f5f5; }
-        
-        .status-select { padding: 8px; border-radius: 4px; border: 1px solid #ccc; font-size: 1em; width: 100%; max-width: 120px; }
-
-        /* Status Colors */
-        .status-select[value="MASTER"] { background-color: #c62828; color: white; font-weight: 700; }
-        .status-select[value="SUB_ADMIN"] { background-color: #e65100; color: white; }
-        .status-select[value="AKTIF"] { background-color: #388e3c; color: white; }
-        .status-select[value="PENDING"] { background-color: #fbc02d; color: black; }
-        .status-select[value="DITOLAK"] { background-color: #616161; color: white; }
-
-        /* Messages */
-        .message { text-align: center; margin-top: 20px; padding: 12px; border-radius: 8px; font-weight: 600; opacity: 0; transition: opacity 0.5s, transform 0.5s; transform: translateY(10px); }
-        .message.success { background-color: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
-        .message.error { background-color: #fce4e4; color: #c62828; border-color: #ef9a9a; border: 1px solid; }
-        .message.loading { background-color: #fffde7; color: #fbc02d; border-color: #fff9c4; border: 1px solid; }
-        .message.show { opacity: 1; transform: translateY(0); }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; color: #333; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
+        h1 { color: #1e88e5; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px; }
+        .info-bar { background-color: #e3f2fd; color: #1e88e5; padding: 10px; border-radius: 5px; margin-bottom: 20px; font-weight: 600; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #1e88e5; color: white; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        button { padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.3s; }
+        .edit-btn { background-color: #ffc107; color: #333; }
+        .edit-btn:hover { background-color: #e0a800; }
+        .logout-btn { background-color: #d9534f; color: white; float: right; margin-top: -50px; }
+        .logout-btn:hover { background-color: #c9302c; }
+        /* Modal Styling */
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); }
+        .modal-content { background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 400px; border-radius: 8px; position: relative; }
+        .close-btn { color: #aaa; float: right; font-size: 28px; font-weight: bold; }
+        .close-btn:hover, .close-btn:focus { color: #000; text-decoration: none; cursor: pointer; }
+        /* Status Badges */
+        .status-master { background-color: #007bff; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+        .status-sub_admin { background-color: #28a745; color: white; padding: 4px 8px; border-radius: 4px; }
+        .status-aktif { background-color: #17a2b8; color: white; padding: 4px 8px; border-radius: 4px; }
+        .status-pending { background-color: #ffc107; color: #333; padding: 4px 8px; border-radius: 4px; }
+        .status-blokir { background-color: #dc3545; color: white; padding: 4px 8px; border-radius: 4px; }
+        #message { /* styling sama seperti di index.html */ }
     </style>
 </head>
 <body>
     <div class="container">
-        <img src="smart.jpg" alt="Logo Smart Swalayan" class="header-logo">
-        <h1><i class="fas fa-user-shield"></i> PANEL ADMINISTRASI PENGGUNA</h1>
-
-        <div class="user-info">
-            <span id="userInfoText"><i class="fas fa-user-circle"></i> Memuat Sesi...</span>
-            <button id="logoutButton" title="Keluar"><i class="fas fa-sign-out-alt"></i></button>
-        </div>
+        <h1><i class="fas fa-user-shield"></i> Admin Panel Pengguna</h1>
+        <button class="logout-btn" onclick="logout()">LOGOUT</button>
+        <div id="adminInfo" class="info-bar">Memverifikasi akses...</div>
+        <div id="message"></div>
         
-        <div class="admin-nav">
-             <button id="goToMainButton"><i class="fas fa-home"></i> Ke Halaman Transaksi</button>
-        </div>
-
-        <div class="table-responsive">
-            <table class="user-table">
-                <thead>
-                    <tr>
-                        <th>Nama</th>
-                        <th>Toko</th>
-                        <th>Status Akses</th>
-                    </tr>
-                </thead>
-                <tbody id="userTableBody">
-                    <tr><td colspan="3" style="text-align: center;">Memuat data pengguna...</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <button id="saveChangesButton" disabled><i class="fas fa-save"></i> SIMPAN PERUBAHAN</button>
-        <p id="message" class="message"></p>
+        <h2>Daftar Pengguna</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Nama</th>
+                    <th>Toko</th>
+                    <th>Status</th>
+                    <th>Tanggal Daftar</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="userTableBody">
+                <tr><td colspan="5">Memuat Data...</td></tr>
+            </tbody>
+        </table>
     </div>
 
-<script>
-    // --- PENTING: GANTI DENGAN URL APPS SCRIPT ANDA ---
-    const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwUvS8PJVSZLmeyabHLMlCYdYf7v_INBwjB8VxS-4MNGEEk1IaDjSGQGv9mLdQEj8OH8A/exec'; 
-    // --- AKHIR PENTING ---
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h3>Ubah Status Pengguna</h3>
+            <p>Nama: <span id="modalNama"></span></p>
+            <p>Toko: <span id="modalToko"></span></p>
+            
+            <div class="input-group">
+                <label for="newStatus">Status Baru</label>
+                <select id="newStatus">
+                    <option value="AKTIF">AKTIF</option>
+                    <option value="SUB_ADMIN">SUB_ADMIN</option>
+                    <option value="PENDING">PENDING</option>
+                    <option value="BLOKIR">BLOKIR</option>
+                </select>
+            </div>
+            
+            <button onclick="handleUpdateStatus()">Simpan Perubahan</button>
+        </div>
+    </div>
 
-    const USER_TABLE_BODY = document.getElementById('userTableBody');
-    const MESSAGE_ELEMENT = document.getElementById('message');
-    let currentUserSession = null;
+    <script>
+        // --- PENTING: GANTI DENGAN URL APPS SCRIPT ANDA ---
+        const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwOVmbAtdQZtNCRXdxsYMnvCQmuCp_BzMLsIzIRmeLmyAUrrsgihDi2Efv4En0N542ZnQ/exec'; 
+        // --- AKHIR PENTING ---
 
-    // ... (Fungsi displayMessage dan sendApiRequest - SALIN DARI index.html) ...
-    // Pastikan sendApiRequest menggunakan let targetUrl untuk GET.
+        const USER_TABLE_BODY = document.getElementById('userTableBody');
+        const MESSAGE_ELEMENT = document.getElementById('message');
+        let currentUserSession = null;
+        let usersToUpdate = []; // Array untuk menyimpan perubahan status yang akan dikirim
 
-    function checkAdminAccess() {
-        const session = localStorage.getItem('userSession');
-        if (!session) {
-            window.location.href = './index.html'; // Belum login
-            return false;
+        // --- (Fungsi displayMessage - SALIN DARI index.html) ---
+        function displayMessage(text, type = 'error') {
+            MESSAGE_ELEMENT.textContent = text;
+            MESSAGE.ELEMENT.classList.remove('show', 'error', 'loading', 'success');
+            
+            MESSAGE_ELEMENT.classList.add(type);
+
+            setTimeout(() => {
+                MESSAGE_ELEMENT.classList.add('show');
+            }, 10); 
+
+            if (type !== 'loading') {
+                setTimeout(() => {
+                    MESSAGE_ELEMENT.classList.remove('show');
+                }, 7000);
+            }
         }
-        currentUserSession = JSON.parse(session);
         
-        if (currentUserSession.status !== 'MASTER' && currentUserSession.status !== 'SUB_ADMIN') {
-            displayMessage('❌ Akses Ditolak: Anda tidak memiliki hak Admin.', 'error');
-            setTimeout(() => window.location.href = './main.html', 3000);
-            return false;
-        }
-        
-        // Tampilkan info sesi di UI
-        document.getElementById('adminInfo').textContent = 
-            `Anda Login sebagai: ${currentUserSession.nama} (${currentUserSession.status}) di Toko ${currentUserSession.toko}`;
-        
-        return true;
-    }
-
-    async function loadUserList() {
-        if (!checkAdminAccess()) return;
-
-        USER_TABLE_BODY.innerHTML = '<tr><td colspan="4">⏳ Memuat data pengguna...</td></tr>';
-        
-        try {
-            // Kirim status dan toko pengguna yang meminta ke Apps Script
-            const data = {
-                action: 'getAdminUsers',
-                userStatus: currentUserSession.status,
-                userToko: currentUserSession.toko
+        // --- FUNGSI API REQUEST (ANTI-CORS: Menggunakan form-urlencoded) ---
+        async function sendApiRequest(action, data = {}, method = 'POST') {
+            const payload = { action, ...data };
+            const body = new URLSearchParams(payload).toString(); 
+            
+            let targetUrl = GAS_API_URL;
+            const options = {
+                method: method,
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, 
             };
-
-            const response = await sendApiRequest('getAdminUsers', data, 'POST'); 
-            const users = response.users || [];
             
-            renderUserTable(users);
-            
-        } catch (error) {
-            displayMessage('❌ Gagal memuat daftar pengguna: ' + error.message, 'error');
-            USER_TABLE_BODY.innerHTML = '<tr><td colspan="4">❌ Gagal memuat data.</td></tr>';
-        }
-    }
-
-    function renderUserTable(users) {
-        USER_TABLE_BODY.innerHTML = '';
-        if (users.length === 0) {
-            USER_TABLE_BODY.innerHTML = '<tr><td colspan="4">Tidak ada pengguna yang terdaftar di area Anda.</td></tr>';
-            return;
-        }
-
-        users.forEach(user => {
-            let actionsHtml = '';
-            
-            // Logika Frontend: Hanya tampilkan tombol Aksi untuk status non-MASTER
-            // Master Admin dapat melihat semua (karena backend mengirimkannya), 
-            // tetapi hanya dapat mengedit yang statusnya di bawah mereka.
-            
-            if (user.status === 'MASTER') {
-                actionsHtml = `<span>Master Admin Tertinggi</span>`;
-            } else {
-                // Semua pengguna lain dapat di-edit oleh Master dan Sub Admin 
-                // (karena Sub Admin HANYA melihat pengguna toko mereka)
-                actionsHtml = `
-                    <button class="edit-btn" onclick="openEditModal('${user.nama}', '${user.toko}', '${user.status}')">
-                        <i class="fas fa-edit"></i> Ubah Status
-                    </button>
-                `;
+            if (method === 'POST') {
+                options.body = body;
+            } else if (method === 'GET') {
+                const searchParams = new URLSearchParams(payload);
+                targetUrl += '?' + searchParams.toString();
+                delete options.body; 
+                delete options.headers; 
             }
 
-            const row = `
-                <tr>
-                    <td>${user.nama}</td>
-                    <td>${user.toko}</td>
-                    <td><span class="status-${user.status.toLowerCase()}">${user.status}</span></td>
-                    <td>${actionsHtml}</td>
-                </tr>
-            `;
-            USER_TABLE_BODY.insertAdjacentHTML('beforeend', row);
-        });
-    }
+            const response = await fetch(targetUrl, options);
+            const responseText = await response.text();
+            
+            try {
+                const responseData = JSON.parse(responseText);
+                if (responseData.status === 'error') {
+                    console.error("Error Log dari Apps Script:", responseData.message); 
+                    throw new Error(responseData.message); 
+                }
+                return responseData;
+            } catch (e) {
+                 console.error("Gagal Parse JSON atau Kesalahan Jaringan:", responseText, e); 
+                 if (e.message && e.message.includes('Akses ditolak')) {
+                     throw e; 
+                 }
+                 throw new Error('Gagal berkomunikasi dengan server. Cek koneksi atau URL Apps Script.');
+            }
+        }
+        // --- END sendApiRequest ---
 
-    // ... (Fungsi openEditModal dan handleUpdateStatus akan diletakkan di sini) ...
-    // Di dalam handleUpdateStatus, Anda harus memvalidasi lagi di frontend 
-    // agar MASTER ADMIN tidak dapat diubah (meskipun backend sudah melindungi)
-    
-    document.addEventListener('DOMContentLoaded', () => {
-        loadUserList();
-    });
-</script>
+        function checkAdminAccess() {
+            const session = localStorage.getItem('userSession');
+            if (!session) {
+                window.location.href = './index.html';
+                return false;
+            }
+            currentUserSession = JSON.parse(session);
+            
+            const isAdmin = currentUserSession.status === 'MASTER' || currentUserSession.status === 'SUB_ADMIN';
+            
+            if (!isAdmin) {
+                displayMessage('❌ Akses Ditolak: Anda bukan Admin.', 'error');
+                setTimeout(() => window.location.href = './main.html', 3000);
+                return false;
+            }
+            
+            document.getElementById('adminInfo').textContent = 
+                `Anda Login sebagai: ${currentUserSession.nama} (${currentUserSession.status}) di Toko ${currentUserSession.toko}`;
+            
+            return true;
+        }
+
+        function logout() {
+            localStorage.removeItem('userSession');
+            window.location.href = './index.html';
+        }
+
+        async function loadUserList() {
+            if (!checkAdminAccess()) return;
+
+            USER_TABLE_BODY.innerHTML = '<tr><td colspan="5">⏳ Memuat data pengguna...</td></tr>';
+            
+            try {
+                // Kirim status dan toko pengguna yang meminta ke Apps Script
+                const data = {
+                    action: 'getAdminUsers',
+                    userStatus: currentUserSession.status,
+                    userToko: currentUserSession.toko
+                };
+
+                const response = await sendApiRequest('getAdminUsers', data, 'POST'); 
+                const users = response.users || [];
+                
+                renderUserTable(users);
+                
+            } catch (error) {
+                displayMessage('❌ Gagal memuat daftar pengguna: ' + error.message, 'error');
+                USER_TABLE_BODY.innerHTML = '<tr><td colspan="5">❌ Gagal memuat data.</td></tr>';
+            }
+        }
+
+        function renderUserTable(users) {
+            USER_TABLE_BODY.innerHTML = '';
+            if (users.length === 0) {
+                USER_TABLE_BODY.innerHTML = '<tr><td colspan="5">Tidak ada pengguna yang terdaftar di area Anda.</td></tr>';
+                return;
+            }
+
+            const isAdminMaster = currentUserSession.status === 'MASTER';
+
+            users.forEach(user => {
+                let actionsHtml = '';
+                
+                // PENTING: Logika Hirarki Display
+                if (user.status === 'MASTER') {
+                    // Hanya Master Admin yang bisa melihat baris Master (walau backend sudah filter)
+                    actionsHtml = `<span>Master Admin Tertinggi</span>`;
+                    // Jika Sub Admin bisa melihat (kebocoran), dia tidak akan bisa mengedit
+                } else {
+                    // Semua pengguna lain dapat di-edit
+                    actionsHtml = `
+                        <button class="edit-btn" 
+                            onclick="openEditModal('${user.nama}', '${user.toko}', '${user.status}')">
+                            <i class="fas fa-edit"></i> Ubah Status
+                        </button>
+                    `;
+                }
+
+                const row = `
+                    <tr>
+                        <td>${user.nama}</td>
+                        <td>${user.toko}</td>
+                        <td><span class="status-${user.status.toLowerCase().replace('_', '-')}">${user.status}</span></td>
+                        <td>${user.tanggal}</td>
+                        <td>${actionsHtml}</td>
+                    </tr>
+                `;
+                USER_TABLE_BODY.insertAdjacentHTML('beforeend', row);
+            });
+        }
+        
+        function openEditModal(nama, toko, status) {
+            document.getElementById('modalNama').textContent = nama;
+            document.getElementById('modalToko').textContent = toko;
+            document.getElementById('newStatus').value = status;
+            document.getElementById('editModal').style.display = 'block';
+
+            // Bersihkan atau inisialisasi array update hanya saat modal dibuka
+            usersToUpdate = [];
+        }
+
+        function closeModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+        
+        async function handleUpdateStatus() {
+            const nama = document.getElementById('modalNama').textContent;
+            const toko = document.getElementById('modalToko').textContent;
+            const newStatus = document.getElementById('newStatus').value;
+
+            // Tambahkan ke array update
+            usersToUpdate.push({ nama, toko, newStatus });
+
+            displayMessage('⏳ Menyimpan perubahan status...', 'loading');
+            closeModal();
+            
+            try {
+                const data = {
+                    action: 'updateUserStatus',
+                    updates: JSON.stringify(usersToUpdate),
+                    tokoAdmin: currentUserSession.toko,
+                    isAdminMaster: currentUserSession.status === 'MASTER' ? 'true' : 'false'
+                };
+
+                const response = await sendApiRequest('updateUserStatus', data, 'POST');
+                
+                displayMessage(`✅ ${response.message}`, 'success');
+                usersToUpdate = []; // Kosongkan array setelah berhasil
+                loadUserList(); // Muat ulang daftar
+                
+            } catch (error) {
+                displayMessage(`❌ Gagal menyimpan status: ${error.message}`, 'error');
+                // Biarkan usersToUpdate tetap ada jika Anda ingin mencoba lagi, atau reset:
+                usersToUpdate = []; 
+                loadUserList(); // Muat ulang untuk mendapatkan status asli
+            }
+        }
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (checkAdminAccess()) {
+                loadUserList();
+            }
+        });
+    </script>
 </body>
 </html>
